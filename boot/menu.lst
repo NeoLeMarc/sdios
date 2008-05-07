@@ -6,4 +6,4 @@ kernel /home/marcel/sdi/boot/kickstart
 module /home/marcel/sdi/boot/ia32-kernel
 module /home/marcel/sdi/boot/sigma0
 module /home/marcel/sdi/boot/root
-module /home/marcel/sdi/boot/test
+module /home/marcel/sdi/boot/test2

@@ -458,6 +458,7 @@ serv/sigma0/Makefile
 src/Makefile
 src/root/Makefile
 src/test/Makefile
+src/test2/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile
