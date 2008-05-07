@@ -1,0 +1,10 @@
+ia32-syscall-init.o: ../../../sdios/lib/l4/ia32-syscall-init.cc \
+  ../../../sdios/include/l4/types.h \
+  ../../../sdios/include/l4/ia32/types.h \
+  ../../../sdios/include/l4/ia32/specials.h \
+  ../../../sdios/include/l4/kdebug.h \
+  ../../../sdios/include/l4/ia32/kdebug.h ../../../sdios/include/l4/kip.h \
+  ../../../sdios/include/l4/ia32/syscalls.h \
+  ../../../sdios/include/l4/ia32/vregs.h \
+  ../../../sdios/include/l4/message.h
+ia32-syscall-stubs.o: ../../../sdios/lib/l4/ia32-syscall-stubs.S

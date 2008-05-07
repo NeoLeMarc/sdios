@@ -1,0 +1,12 @@
+crt0-ia32.o: ../../../sdios/serv/sigma0/crt0-ia32.S ../../config.h
+sigma0.o: ../../../sdios/serv/sigma0/sigma0.cc \
+  ../../../sdios/include/l4/kip.h ../../../sdios/include/l4/types.h \
+  ../../../sdios/include/l4/ia32/types.h \
+  ../../../sdios/include/l4/ia32/specials.h \
+  ../../../sdios/include/l4/ia32/syscalls.h \
+  ../../../sdios/include/l4/ia32/vregs.h \
+  ../../../sdios/include/l4/message.h ../../../sdios/include/l4/ipc.h \
+  ../../../sdios/include/l4/thread.h ../../../sdios/include/l4/misc.h \
+  ../../../sdios/include/l4/kdebug.h \
+  ../../../sdios/include/l4/ia32/kdebug.h ../../../sdios/include/l4io.h \
+  /usr/lib/gcc/i486-linux-gnu/4.1.2/include/stdarg.h
