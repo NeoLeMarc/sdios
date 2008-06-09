@@ -225,51 +225,115 @@
 
 \begin{frame}
     \frametitle{New}
+
+    \begin{itemize}
+        \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
+        \item \emph{Task server} creates a new \emph{region mapper} inside new \emph{address space}
+        \item \emph{Task server} sends message to \emph{Region mapper}, telling it the path of the image to load
+        \item \emph{Region mapper} asks \emph{ELF-Loader} (or \emph{PE-Loader} or whatever) to map image into its \emph{address space} 
+        \item \emph{Region mapper} starts mapped program inside new thread 
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
     \frametitle{Fork}
+
+    \begin{itemize}
+        \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
+        \item \emph{Task server} creates a new \emph{region mapper} inside new \emph{address space}
+        \item \emph{Task server} asks \emph{memory server} to map old \emph{User space} and \emph{Stack} into new \emph{address space}
+        \item \emph{Task server} sends message to \emph{region mapper}
+        \item \emph{Region mapper} resumes operation in new address space
+    \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{Exec}
+
+    \begin{itemize}
+        \item \emph{Task server} kills alll \emph{threads} inside address space except \emph{region mapper}
+        \item \emph{Task server} sends message to \emph{Region mapper}, telling it the path of the image to load
+        \item \emph{Region mapper} asks \emph{ELF-Loader} (or \emph{PE-Loader} or whatever) to map image into its \emph{address space} 
+        \item \emph{Region mapper} starts mapped program inside new thread 
+    \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{Kill}
+
+    \begin{itemize}
+        \item If \emph{TID} is a region mapper: Kill all \emph{threads} in \emph{address space} 
+        \item Else kill \emph{thread} specified by \emph{TID}
+    \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{StartThread}
+
+    \begin{itemize}
+        \item \emph{Task server} tells \emph{syscall server} to create a new \emph{thread} inside specified \emph{address space}
+        \item \emph{Task server} tells \emph{region mapper} to start thread
+        \item \emph{Region mapper} creates \emph{thead stack} and sends start message to \emph{thread}
+    \end{itemize}
+
 \end{frame}
 
 \subsection{Settings}
 
 \begin{frame}
     \frametitle{SetStatisticInterval}
+
+    \begin{itemize}
+        \item Sets interval in which statistics are collected
+    \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{SetTimeslice}
+
+    \begin{itemize}
+        \item Sets length of timeslice
+    \end{itemize}
+
 \end{frame}
 
 \begin{frame}
     \frametitle{SetPriority}
+
+    \begin{itemize}
+        \item Sets priority of \emph{thread} identified by \emph{TID} 
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
     \frametitle{SetPreemptionDelay}
+
+    \begin{itemize}
+        \item Sets preemption delay of \emph{thread} identified by \emph{TID} 
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
     \frametitle{Ping}
+
+    \begin{itemize}
+        \item Sends \emph{ping message} to \emph{region mapper} of \emph{address space} to check if it is still responsive
+    \end{itemize}
 \end{frame}
 
 \section{Statistics}
 \subsection{Statistics over virtual Filesystem}
 
 \begin{frame}
-    \frametitle{Ping}
+    \frametitle{Statistics}
+
+    \begin{itemize}
+        \item Collected statistics are accessed via virtual filesystem 
+    \end{itemize}
 \end{frame}
 
 
