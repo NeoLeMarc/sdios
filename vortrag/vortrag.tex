@@ -160,6 +160,64 @@
 
 \begin{frame}
     \frametitle{Stack Positioning}
+
+     \begin{itemize}
+        \item \emph{Main program stack} is created just below \emph{Region Mapper}, growing down, towards \emph{heap}
+        \item For every additional thread, \emph{stack space} is allocated from \emph{heap}, surrounded by \emph{read only pages} to detect overflow 
+        \item \emph{Thread stacks} are created by \emph{region mapper} 
+
+        \begin{pgfpicture}{0cm}{0cm}{7cm}{4cm}
+            \color{black}
+            \pgfnodebox{User Address Space}[fill]{\pgfxy(2,3)}{}{20pt}{5pt}
+
+            \color{blue}
+            \pgfnodebox{Thread Stack}[fill]{\pgfxy(2.6,3)}{}{6pt}{5pt}
+
+            \color{black}
+            \pgfnodebox{User Address Space 2}[fill]{\pgfxy(3.5,3)}{}{20pt}{5pt}
+
+            \color{blue}
+            \pgfnodebox{Stack}[fill]{\pgfxy(4,3)}{}{10pt}{5pt}
+            \color{green}
+            \pgfnodebox{Region Mapper}[fill]{\pgfxy(5,3)}{}{18pt}{5pt}
+            \color{red}
+            \pgfnodebox{Kernel Space}[fill]{\pgfxy(6,3)}{}{25pt}{5pt}
+
+            \color{blue}
+            \pgfnodebox{Thread Stack Label}[virtual]{\pgfxy(1,2)}{Thread Stack}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Thread Stack Label}{Thread Stack}{90}{-90}{.5cm}{.5cm}
+
+            \color{black}
+            \pgfnodebox{User Label}[virtual]{\pgfxy(2.5,1.5)}{User Space}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconnline{User Label}{User Address Space}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconnline{User Label}{User Address Space 2}
+
+            \color{blue}
+            \pgfnodebox{Stack Label}[virtual]{\pgfxy(3.5,1)}{Main Stack}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Stack Label}{Stack}{90}{-90}{.5cm}{.5cm}
+
+            \color{green}
+            \pgfnodebox{Region Label}[virtual]{\pgfxy(5,1.5)}{Region Mapper}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Region Label}{Region Mapper}{90}{-90}{.5cm}{.5cm}
+
+            \color{red}
+            \pgfnodebox{Kernel Label}[virtual]{\pgfxy(7,1)}{Kernel Space}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Kernel Label}{Kernel Space}{90}{-90}{.5cm}{.5cm}
+
+
+        \end{pgfpicture}
+
+
+     \end{itemize}
+
+
+    
 \end{frame}
 
 \section{Interface}

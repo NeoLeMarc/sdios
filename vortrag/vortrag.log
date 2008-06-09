@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.30.5-2.2 (Web2C 7.5.5) (format=pdflatex 2008.4.6)  10 JUN 2008 00:46
+This is pdfeTeX, Version 3.141592-1.30.5-2.2 (Web2C 7.5.5) (format=pdflatex 2008.4.6)  10 JUN 2008 01:02
 entering extended mode
 **vortrag.tex
 (./vortrag.tex
@@ -764,10 +764,10 @@ LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <10.95> not available
 
  (./vortrag.aux) ) 
 Here is how much of TeX's memory you used:
- 8203 strings out of 94432
- 140288 string characters out of 1175567
+ 8212 strings out of 94432
+ 140498 string characters out of 1175567
  220593 words of memory out of 1000000
- 11121 multiletter control sequences out of 10000+50000
+ 11130 multiletter control sequences out of 10000+50000
  23782 words of font info for 53 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
  45i,19n,67p,234b,559s stack positions out of 1500i,500n,5000p,200000b,5000s
@@ -778,4 +778,4 @@ PDF statistics:
 {/usr/share/texmf/fonts/enc/dvips/psnfss/8r.enc}</usr/share/t
 exmf/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/share/texmf/fonts/type1/urw/hel
 vetic/uhvr8a.pfb></usr/share/texmf/fonts/type1/urw/helvetic/uhvb8a.pfb>
-Output written on vortrag.pdf (24 pages, 223412 bytes).
+Output written on vortrag.pdf (24 pages, 225592 bytes).
