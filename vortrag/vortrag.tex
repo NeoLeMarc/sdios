@@ -82,7 +82,7 @@
 
 \part<presentation>{Main Talk}
 
-\section{Interface}
+\section{Design}
 
 \subsection{System Components}
 
@@ -97,7 +97,8 @@
         \color{blue}
         \pgfnodebox{Syscall Server}[stroke]{\pgfxy(7,5)}{\color{black}Syscall Server}{15pt}{2pt}
         \color{black}
-        \pgfnodebox{Memory Server}[stroke]{\pgfxy(2,5)}{Memory Server}{15pt}{2pt}
+        \pgfnodebox{Anonymous Memory Server}[stroke]{\pgfxy(2,5)}{Anonymous Memory Server}{15pt}{2pt}
+        \pgfnodebox{Data Space Providers}[stroke]{\pgfxy(2,4)}{Data Space Providers}{15pt}{2pt}
         \pgfnodebox{ELF Loader}[stroke]{\pgfxy(10,3.5)}{ELF Loader}{15pt}{2pt}
         \pgfnodebox{Fileserver}[stroke]{\pgfxy(10,2.5)}{Fileserver}{15pt}{2pt}
         \pgfnodebox{Taskserver}[stroke]{\pgfxy(5,1)}{Taskserver}{15pt}{2pt}
@@ -107,6 +108,113 @@
 
     \end{pgfpicture}
 \end{frame}
+
+\subsection{Sawmill Inspired Data Spaces}
+
+\begin{frame}
+    \frametitle{Sawmill Inspired Data Spaces}
+
+     \begin{itemize}
+        \item Every address space has got it's own managing thread, called \emph{region mapper}. 
+        \item \emph{ragion mapper} resides at the end of user address space, just below kernel.
+        \item \emph{ragion mapper} holds mapping between \emph{VM Region} and \emph{Data Space Provider}
+
+        \begin{pgfpicture}{0cm}{0cm}{7cm}{4cm}
+            \color{black}
+            \pgfnodebox{User Address Space}[fill]{\pgfxy(2,3)}{}{50pt}{5pt}
+            \color{blue}
+            \pgfnodebox{Stack}[fill]{\pgfxy(4,3)}{}{10pt}{5pt}
+            \color{green}
+            \pgfnodebox{Region Mapper}[fill]{\pgfxy(5,3)}{}{18pt}{5pt}
+            \color{red}
+            \pgfnodebox{Kernel Space}[fill]{\pgfxy(6,3)}{}{25pt}{5pt}
+
+            \color{black}
+            \pgfnodebox{User Label}[virtual]{\pgfxy(2,1.5)}{User Space}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconnline{User Label}{User Address Space}
+
+            \color{blue}
+            \pgfnodebox{Stack Label}[virtual]{\pgfxy(3.5,1)}{Main Stack}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Stack Label}{Stack}{90}{-90}{.5cm}{.5cm}
+
+            \color{green}
+            \pgfnodebox{Region Label}[virtual]{\pgfxy(5,1.5)}{Region Mapper}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Region Label}{Region Mapper}{90}{-90}{.5cm}{.5cm}
+
+            \color{red}
+            \pgfnodebox{Kernel Label}[virtual]{\pgfxy(7,1)}{Kernel Space}{50pt}{5pt}
+            \pgfsetendarrow{\pgfarrowto}
+            \pgfnodeconncurve{Kernel Label}{Kernel Space}{90}{-90}{.5cm}{.5cm}
+
+
+        \end{pgfpicture}
+
+     \end{itemize}
+
+\end{frame}
+
+\subsection{Stack Positioning}
+
+\begin{frame}
+    \frametitle{Stack Positioning}
+\end{frame}
+
+\section{Interface}
+\subsection{Process management}
+
+\begin{frame}
+    \frametitle{New}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Fork}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Exec}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Kill}
+\end{frame}
+
+\begin{frame}
+    \frametitle{StartThread}
+\end{frame}
+
+\subsection{Settings}
+
+\begin{frame}
+    \frametitle{SetStatisticInterval}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SetTimeslice}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SetPriority}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SetPreemptionDelay}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Ping}
+\end{frame}
+
+\section{Statistics}
+\subsection{Statistics over virtual Filesystem}
+
+\begin{frame}
+    \frametitle{Ping}
+\end{frame}
+
+
+
+
 \end{document}
-
-
