@@ -1,0 +1,112 @@
+% $Header: /cvsroot/latex-beamer/latex-beamer/examples/beamerexample1.tex,v 1.47 2004/11/04 15:43:51 tantau Exp $
+
+\documentclass{beamer}
+%\documentclass{article}
+%\usepackage[envcountsect]{beamerarticle}
+
+% Do NOT take this file as a template for your own talks. Use a file
+% in the directory solutions instead. They are much better suited.
+
+% Try the class options [notes], [notes=only], [trans], [handout],
+% [red], [compress], [draft] and see what happens!
+
+% Copyright 2003 by Till Tantau <tantau@users.sourceforge.net>.
+%
+% This program can be redistributed and/or modified under the terms
+% of the LaTeX Project Public License Distributed from CTAN
+% archives in directory macros/latex/base/lppl.txt.
+
+% For a green structure color use:
+%\colorlet{structure}{green!50!black}
+
+\mode<article> % only for the article version
+{
+  \usepackage{fullpage}
+  \usepackage{hyperref}
+}
+
+
+\mode<presentation>
+{
+  \setbeamertemplate{background canvas}[vertical shading][bottom=red!10,top=blue!10]
+
+  \usetheme{Warsaw}
+  \usefonttheme[onlysmall]{structurebold}
+}
+
+%\setbeamercolor{math text}{fg=green!50!black}
+%\setbeamercolor{normal text in math text}{parent=math text}
+
+\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+\usepackage{amsmath,amssymb}
+\usepackage[latin1]{inputenc}
+\usepackage{colortbl}
+\usepackage[english]{babel}
+
+%\usepackage{lmodern}
+%\usepackage[T1]{fontenc} 
+
+\usepackage{times}
+
+\setbeamercovered{dynamic}
+
+%% Titel etc
+\title[Ssystem Design \& Implementation]{Taskserver Design}
+\author[Tepelmann, Noe]{Jan Tepelmann \and Marcel Noe}
+\institute[Universität Karlsruhe (TH)]{
+        \inst{} System Architecture Group\\
+                Universität Karlsruhe (TH)}
+\date[SDI 2008]{System Design \& Implementation, 2008}
+\subject{Operating System Design}
+
+
+%% Hauptseite
+
+\begin{document}
+\frame{\titlepage}
+
+\section<presentation>*{Outline}
+
+\begin{frame}
+  \frametitle{Outline}
+  \tableofcontents[part=1,pausesections]
+\end{frame}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Outline}
+    \tableofcontents[current,currentsubsection]
+  \end{frame}
+}
+
+\part<presentation>{Main Talk}
+
+\section{Interface}
+
+\subsection{System Components}
+
+\begin{frame}
+    \frametitle{System Components}
+
+    \begin{pgfpicture}{0cm}{0cm}{20cm}{7cm}
+        \color{red}
+        \pgfnodebox{L4}[stroke]{\pgfxy(5,7)}{\color{black}L4 Microkernel}{15pt}{2pt}
+        \color{green}
+        \pgfnodebox{Sigma 0}[stroke]{\pgfxy(5,6)}{\color{black}Sigma 0}{15pt}{2pt}
+        \color{blue}
+        \pgfnodebox{Syscall Server}[stroke]{\pgfxy(7,5)}{\color{black}Syscall Server}{15pt}{2pt}
+        \color{black}
+        \pgfnodebox{Memory Server}[stroke]{\pgfxy(2,5)}{Memory Server}{15pt}{2pt}
+        \pgfnodebox{ELF Loader}[stroke]{\pgfxy(10,3.5)}{ELF Loader}{15pt}{2pt}
+        \pgfnodebox{Fileserver}[stroke]{\pgfxy(10,2.5)}{Fileserver}{15pt}{2pt}
+        \pgfnodebox{Taskserver}[stroke]{\pgfxy(5,1)}{Taskserver}{15pt}{2pt}
+
+%        \pgfsetendarrow{\pgfarrowto}
+%        \pgfnodeconncurve{Syscall Server}{Taskserver}{-90}{90}{.5cm}{.5cm}
+
+    \end{pgfpicture}
+\end{frame}
+\end{document}
+
+

@@ -1,0 +1,4 @@
+\beamer@endinputifotherversion {3.01pt}
+\select@language {english}
+\beamer@sectionintoc {2}{Interface}{3}{1}{1}
+\beamer@subsectionintoc {2}{1}{System Components}{3}{1}{1}
