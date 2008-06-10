@@ -65,8 +65,10 @@
 \headcommand {\beamer@framepages {23}{23}}
 \headcommand {\slideentry {4}{1}{2}{24/24}{Statistics over virtual Filesystem}{1}}
 \headcommand {\beamer@framepages {24}{24}}
-\headcommand {\beamer@partpages {5}{24}}
-\headcommand {\beamer@subsectionpages {23}{24}}
-\headcommand {\beamer@sectionpages {23}{24}}
-\headcommand {\beamer@documentpages {24}}
-\headcommand {\def \inserttotalframenumber {22}}
+\headcommand {\slideentry {4}{1}{3}{25/25}{Statistics over virtual Filesystem}{1}}
+\headcommand {\beamer@framepages {25}{25}}
+\headcommand {\beamer@partpages {5}{25}}
+\headcommand {\beamer@subsectionpages {23}{25}}
+\headcommand {\beamer@sectionpages {23}{25}}
+\headcommand {\beamer@documentpages {25}}
+\headcommand {\def \inserttotalframenumber {23}}

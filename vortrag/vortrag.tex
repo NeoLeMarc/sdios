@@ -51,7 +51,7 @@
 \setbeamercovered{dynamic}
 
 %% Titel etc
-\title[Ssystem Design \& Implementation]{Taskserver Design}
+\title[System Design \& Implementation]{Taskserver Design}
 \author[Tepelmann, Noe]{Jan Tepelmann \and Marcel Noe}
 \institute[Universität Karlsruhe (TH)]{
         \inst{} System Architecture Group\\
@@ -89,7 +89,7 @@
 \begin{frame}
     \frametitle{System Components}
 
-    \begin{pgfpicture}{0cm}{0cm}{20cm}{7cm}
+    \begin{pgfpicture}{0cm}{0cm}{20cm}{7.5cm}
         \color{red}
         \pgfnodebox{L4}[stroke]{\pgfxy(5,7)}{\color{black}L4 Microkernel}{15pt}{2pt}
         \color{green}
@@ -97,7 +97,7 @@
         \color{blue}
         \pgfnodebox{Syscall Server}[stroke]{\pgfxy(7,5)}{\color{black}Syscall Server}{15pt}{2pt}
         \color{black}
-        \pgfnodebox{Anonymous Memory Server}[stroke]{\pgfxy(2,5)}{Anonymous Memory Server}{15pt}{2pt}
+        \pgfnodebox{Anonymous Memory Provider}[stroke]{\pgfxy(2,5)}{Anonymous Memory Provider}{15pt}{2pt}
         \pgfnodebox{Data Space Providers}[stroke]{\pgfxy(2,4)}{Data Space Providers}{15pt}{2pt}
         \pgfnodebox{ELF Loader}[stroke]{\pgfxy(10,3.5)}{ELF Loader}{15pt}{2pt}
         \pgfnodebox{Fileserver}[stroke]{\pgfxy(10,2.5)}{Fileserver}{15pt}{2pt}
@@ -226,6 +226,8 @@
 \begin{frame}
     \frametitle{New}
 
+    \texttt{L4\_ThreadId\_t New(in String path, in String args);}
+
     \begin{itemize}
         \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
         \item \emph{Task server} creates a new \emph{region mapper} inside new \emph{address space}
@@ -237,6 +239,8 @@
 
 \begin{frame}
     \frametitle{Fork}
+
+    \texttt{L4\_ThreadId\_t Fork();}
 
     \begin{itemize}
         \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
@@ -251,6 +255,9 @@
 \begin{frame}
     \frametitle{Exec}
 
+    \texttt{L4\_ThreadId\_t Exec();}
+
+
     \begin{itemize}
         \item \emph{Task server} kills alll \emph{threads} inside address space except \emph{region mapper}
         \item \emph{Task server} sends message to \emph{Region mapper}, telling it the path of the image to load
@@ -263,6 +270,8 @@
 \begin{frame}
     \frametitle{Kill}
 
+    \texttt{Void Kill(in L4\_ThreadId\_t tid);}
+
     \begin{itemize}
         \item If \emph{TID} is a region mapper: Kill all \emph{threads} in \emph{address space} 
         \item Else kill \emph{thread} specified by \emph{TID}
@@ -272,6 +281,9 @@
 
 \begin{frame}
     \frametitle{StartThread}
+
+    \texttt{L4\_ThreadId\_t StartThread(in L4\_Pointer\_t ip, in L4\_Pointer\_t sp, in L4\_Word\_t stackSize);}
+
 
     \begin{itemize}
         \item \emph{Task server} tells \emph{syscall server} to create a new \emph{thread} inside specified \emph{address space}
@@ -286,6 +298,9 @@
 \begin{frame}
     \frametitle{SetStatisticInterval}
 
+    \texttt{void SetStatisticInterval(in unsigned int interval);}
+
+
     \begin{itemize}
         \item Sets interval in which statistics are collected
     \end{itemize}
@@ -294,6 +309,8 @@
 
 \begin{frame}
     \frametitle{SetTimeslice}
+
+    \texttt{void SetTimeslice(in unsigned int timeslice);}
 
     \begin{itemize}
         \item Sets length of timeslice
@@ -304,6 +321,8 @@
 \begin{frame}
     \frametitle{SetPriority}
 
+    \texttt{unsigned int SetPriority(in unsigned int priority);}
+
     \begin{itemize}
         \item Sets priority of \emph{thread} identified by \emph{TID} 
     \end{itemize}
@@ -312,6 +331,8 @@
 \begin{frame}
     \frametitle{SetPreemptionDelay}
 
+    \texttt{L4\_Word\_t SetPreemptionDelay(in L4\_ThreadId\_t tid, in L4\_Word\_t sensitivePrio, in L4\_Word\_t MaxDelay);}
+
     \begin{itemize}
         \item Sets preemption delay of \emph{thread} identified by \emph{TID} 
     \end{itemize}
@@ -319,6 +340,8 @@
 
 \begin{frame}
     \frametitle{Ping}
+
+    \texttt{unsigned int Ping(in L4\_ThreadId\_t tid);}
 
     \begin{itemize}
         \item Sends \emph{ping message} to \emph{region mapper} of \emph{address space} to check if it is still responsive
@@ -336,6 +359,15 @@
     \end{itemize}
 \end{frame}
 
+
+
+\begin{frame}
+    \frametitle{Questions?}
+
+    \begin{itemize}
+        \item Please feel free to ask \emph{questions} or give \emph{comments}!
+    \end{itemize}
+\end{frame}
 
 
 
