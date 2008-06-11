@@ -116,8 +116,8 @@
 
      \begin{itemize}
         \item Every address space has got it's own managing thread, called \emph{region mapper}. 
-        \item \emph{ragion mapper} resides at the end of user address space, just below kernel.
-        \item \emph{ragion mapper} holds mapping between \emph{VM Region} and \emph{Data Space Provider}
+        \item \emph{region mapper} resides at the end of user address space, just below kernel.
+        \item \emph{region mapper} holds mapping between \emph{VM Region} and \emph{Data Space Provider}
 
         \begin{pgfpicture}{0cm}{0cm}{7cm}{4cm}
             \color{black}
@@ -229,8 +229,8 @@
     \texttt{L4\_ThreadId\_t New(in String path, in String args);}
 
     \begin{itemize}
-        \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
-        \item \emph{Task server} creates a new \emph{region mapper} inside new \emph{address space}
+        \item \emph{Task server} creates a new \emph{region mapper} inside its new \emph{address space} using the \emph{syscall server}
+        \item \emph{Task server} configures the \emph{address space}
         \item \emph{Task server} sends message to \emph{Region mapper}, telling it the path of the image to load
         \item \emph{Region mapper} asks \emph{ELF-Loader} (or \emph{PE-Loader} or whatever) to map image into its \emph{address space} 
         \item \emph{Region mapper} starts mapped program inside new thread 
