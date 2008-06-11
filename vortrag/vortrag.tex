@@ -52,9 +52,9 @@
 
 %% Titel etc
 \title[System Design \& Implementation]{Taskserver Design}
-\author[Tepelmann, Noe]{Jan Tepelmann \and Marcel Noe}
+\author[Tepelmann, Noe, Lapp]{Jan Tepelmann \and Marcel Noe \and Moritz Lapp}
 \institute[Universität Karlsruhe (TH)]{
-        \inst{} System Architecture Group\\
+        \inst{} SDI Group $\log_2(512)$ \\
                 Universität Karlsruhe (TH)}
 \date[SDI 2008]{System Design \& Implementation, 2008}
 \subject{Operating System Design}
@@ -115,8 +115,8 @@
     \frametitle{Sawmill Inspired Data Spaces}
 
      \begin{itemize}
-        \item Every address space has got it's own managing thread, called \emph{region mapper}. 
-        \item \emph{region mapper} resides at the end of user address space, just below kernel.
+        \item Every address space has got it's own managing thread, called \emph{region mapper} 
+        \item \emph{region mapper} resides at the end of user address space, just below kernel
         \item \emph{region mapper} holds mapping between \emph{VM Region} and \emph{Data Space Provider}
 
         \begin{pgfpicture}{0cm}{0cm}{7cm}{4cm}
@@ -224,9 +224,24 @@
 \subsection{Process management}
 
 \begin{frame}
-    \frametitle{New}
+    \frametitle{Process management}
 
-    \texttt{L4\_ThreadId\_t New(in String path, in String args);}
+    \begin{itemize}
+        \item \emph{startTask()}
+        \item \emph{fork()}
+        \item \emph{exec()}
+        \item \emph{kill()}
+        \item \emph{waitTid()}
+        \item \emph{createThread()}
+        \item \emph{getThreadStatus()}
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{startTask}
+
+    \texttt{L4\_ThreadId\_t startTask(in String path, in String args);}
 
     \begin{itemize}
         \item \emph{Task server} creates a new \emph{region mapper} inside its new \emph{address space} using the \emph{syscall server}
@@ -238,14 +253,14 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Fork}
+    \frametitle{fork}
 
-    \texttt{L4\_ThreadId\_t Fork();}
+    \texttt{L4\_ThreadId\_t fork();}
 
     \begin{itemize}
         \item \emph{Task server} asks \emph{memory server} to create a new \emph{address space} 
         \item \emph{Task server} creates a new \emph{region mapper} inside new \emph{address space}
-        \item \emph{Task server} asks \emph{memory server} to map old \emph{User space} and \emph{Stack} into new \emph{address space}
+        \item \emph{Task server} asks \emph{region mappers} to map old \emph{User space} and \emph{Stack} into new \emph{address space}
         \item \emph{Task server} sends message to \emph{region mapper}
         \item \emph{Region mapper} resumes operation in new address space
     \end{itemize}
@@ -253,9 +268,9 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Exec}
+    \frametitle{exec}
 
-    \texttt{L4\_ThreadId\_t Exec();}
+    \texttt{L4\_ThreadId\_t exec(in String path, in String args);}
 
 
     \begin{itemize}
@@ -268,24 +283,40 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Kill}
+    \frametitle{kill}
 
-    \texttt{Void Kill(in L4\_ThreadId\_t tid);}
+    \texttt{Void kill(in L4\_ThreadId\_t tid);}
 
     \begin{itemize}
         \item If \emph{TID} is a region mapper: Kill all \emph{threads} in \emph{address space} 
         \item Else kill \emph{thread} specified by \emph{TID}
+        \item \emph{Suicidal tendencies}: Every thread has to kill itself at the end
     \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-    \frametitle{StartThread}
+    \frametitle{waitTid}
 
-    \texttt{L4\_ThreadId\_t StartThread(in L4\_Pointer\_t ip, in L4\_Pointer\_t sp, in L4\_Word\_t stackSize);}
+    \texttt{L4\_Word\_t waitTid(in L4\_ThreadId\_t tid);}
+
+    \begin{itemize}
+        \item Waits for \emph{thread} specified by \emph{tid} to terminate 
+        \item Returns the \emph{thread's} \emph{exit} status  
+        \item Status information is stored in \emph{region mapper} of \emph{thread} until 
+              \emph{waitTid()} is called
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{createThread}
+
+    \texttt{L4\_ThreadId\_t createThread();}
 
 
     \begin{itemize}
+        \item \emph{createThead()} returns \emph{global thread id} of new \emph{thread}.
         \item \emph{Task server} tells \emph{syscall server} to create a new \emph{thread} inside specified \emph{address space}
         \item \emph{Task server} tells \emph{region mapper} to start thread
         \item \emph{Region mapper} creates \emph{thead stack} and sends start message to \emph{thread}
@@ -293,15 +324,37 @@
 
 \end{frame}
 
-\subsection{Settings}
+\begin{frame}
+    \frametitle{getThreadStatus}
+
+    \texttt{L4\_Word\_t getThreadStatus(in L4\_ThreadId\_t tid);}
+
+    \begin{itemize}
+        \item Uses \emph{schedule()} system call to check whether a \emph{thread} is still alive. Returns the status code which is returned by \emph{schedule}.
+    \end{itemize}
+\end{frame}
+
+\subsection{Settings, Statistics \& Status}
 
 \begin{frame}
-    \frametitle{SetStatisticInterval}
+    \frametitle{Settings, Statistics \& Status}
 
-    \texttt{void SetStatisticInterval(in unsigned int interval);}
+    \begin{itemize}
+        \item \emph{setStatisticInterval()}
+        \item \emph{setTimeslice()}
+        \item \emph{setPriority()}
+        \item \emph{setPreemptionDelay()}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{setStatisticInterval}
+
+    \texttt{void setStatisticInterval(in L4\_Word\_t interval);}
 
 
     \begin{itemize}
+        \item \emph{interval} is specified in milliseconds
         \item Sets interval in which statistics are collected
         \item Uses \emph{schedule} syscall and an ugly hack which uses the total quantum 
     \end{itemize}
@@ -309,20 +362,21 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{SetTimeslice}
+    \frametitle{setTimeslice}
 
-    \texttt{void SetTimeslice(in unsigned int timeslice);}
+    \texttt{void setTimeslice(in L4\_Word\_t timeslice);}
 
     \begin{itemize}
+        \item \emph{timeslice} is specified in milliseconds
         \item Sets length of timeslice
     \end{itemize}
 
 \end{frame}
 
 \begin{frame}
-    \frametitle{SetPriority}
+    \frametitle{setPriority}
 
-    \texttt{unsigned int SetPriority(in unsigned int priority);}
+    \texttt{L4\_Word\_t setPriority(in L4\_Word\_t priority);}
 
     \begin{itemize}
         \item Sets priority of \emph{thread} identified by \emph{TID} 
@@ -330,22 +384,12 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{SetPreemptionDelay}
+    \frametitle{setPreemptionDelay}
 
-    \texttt{L4\_Word\_t SetPreemptionDelay(in L4\_ThreadId\_t tid, in L4\_Word\_t sensitivePrio, in L4\_Word\_t MaxDelay);}
+    \texttt{L4\_Word\_t setPreemptionDelay(in L4\_ThreadId\_t tid, in L4\_Word\_t sensitivePrio, in L4\_Word\_t maxDelay);}
 
     \begin{itemize}
         \item Sets preemption delay of \emph{thread} identified by \emph{TID} 
-    \end{itemize}
-\end{frame}
-
-\begin{frame}
-    \frametitle{Ping}
-
-    \texttt{unsigned int Ping(in L4\_ThreadId\_t tid);}
-
-    \begin{itemize}
-        \item Sends \emph{ping message} to \emph{region mapper} of \emph{address space} to check if it is still responsive
     \end{itemize}
 \end{frame}
 
@@ -359,7 +403,6 @@
         \item Collected statistics are accessed via virtual filesystem 
     \end{itemize}
 \end{frame}
-
 
 
 \begin{frame}
