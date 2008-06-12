@@ -1,4 +1,4 @@
-\beamer@endinputifotherversion {3.01pt}
+\beamer@endinputifotherversion {3.06pt}
 \select@language {english}
 \beamer@sectionintoc {2}{Design}{5}{1}{1}
 \beamer@subsectionintoc {2}{1}{System Components}{5}{1}{1}

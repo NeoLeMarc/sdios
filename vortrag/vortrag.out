@@ -1,10 +1,11 @@
-\BOOKMARK [1][]{Outline1}{Outline}{}
-\BOOKMARK [1][]{Outline2}{Design}{}
-\BOOKMARK [2][]{Outline2.1.5}{System Components}{Outline2}
-\BOOKMARK [2][]{Outline2.2.7}{Sawmill Inspired Data Spaces}{Outline2}
-\BOOKMARK [2][]{Outline2.3.9}{Stack Positioning}{Outline2}
-\BOOKMARK [1][]{Outline3}{Interface}{}
-\BOOKMARK [2][]{Outline3.1.11}{Process management}{Outline3}
-\BOOKMARK [2][]{Outline3.2.20}{Settings, Statistics \046 Status}{Outline3}
-\BOOKMARK [1][]{Outline4}{Statistics}{}
-\BOOKMARK [2][]{Outline4.1.26}{Statistics over virtual Filesystem}{Outline4}
+\BOOKMARK [2][]{Outline0.1}{Outline}{}
+\BOOKMARK [1][]{Outline1}{Main Talk}{}
+\BOOKMARK [2][]{Outline1.2}{Design}{Outline1}
+\BOOKMARK [3][]{Outline1.2.1.5}{System Components}{Outline1.2}
+\BOOKMARK [3][]{Outline1.2.2.7}{Sawmill Inspired Data Spaces}{Outline1.2}
+\BOOKMARK [3][]{Outline1.2.3.9}{Stack Positioning}{Outline1.2}
+\BOOKMARK [2][]{Outline1.3}{Interface}{Outline1}
+\BOOKMARK [3][]{Outline1.3.1.11}{Process management}{Outline1.3}
+\BOOKMARK [3][]{Outline1.3.2.20}{Settings, Statistics \046 Status}{Outline1.3}
+\BOOKMARK [2][]{Outline1.4}{Statistics}{Outline1}
+\BOOKMARK [3][]{Outline1.4.1.26}{Statistics over virtual Filesystem}{Outline1.4}
