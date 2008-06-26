@@ -1,17 +1,17 @@
 ##
-## File:  src/io_dsm/Makefile.in
+## File:  src/ram_dsm/Makefile.in
 ##
 ## Description: Makefile
 ##
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+srcdir=		.
+top_srcdir=	../..
+top_builddir=	../..
 
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-PROGRAM= io_dsm	
+PROGRAM= ram_dsm	
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/sdi/libsdi.a \

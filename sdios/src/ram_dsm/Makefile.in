@@ -1,5 +1,5 @@
 ##
-## File:  src/test22/Makefile.in
+## File:  src/ram_dsm/Makefile.in
 ##
 ## Description: Makefile
 ##
@@ -11,7 +11,7 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-PROGRAM=	test2
+PROGRAM= ram_dsm	
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/sdi/libsdi.a \
