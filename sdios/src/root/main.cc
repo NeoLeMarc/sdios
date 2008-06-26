@@ -25,7 +25,7 @@
 L4_ThreadId_t sigma0id;
 L4_ThreadId_t pagerid;
 L4_ThreadId_t locatorid;
-L4_ThreadId_t loggerid;
+L4_ThreadId_t syscallid;
 
 
 L4_Word_t pagesize;
@@ -42,7 +42,7 @@ extern char __heap_start;
 extern char __heap_end;
 
 
-L4_Word_t logger_stack[1024];
+L4_Word_t syscall_stack[1024];
 L4_Word_t locator_stack[1024];
 
 
@@ -175,10 +175,10 @@ int main(void) {
 
     L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
 
-    pagerid = L4_Myself ();
-    sigma0id = L4_Pager ();
+    pagerid   = L4_Myself ();
+    sigma0id  = L4_Pager ();
     locatorid = L4_nilthread;
-    loggerid = L4_nilthread;
+    syscallid = L4_nilthread;
 
 
 
@@ -206,7 +206,7 @@ int main(void) {
 
     /****************************************************************
      
-        Start Locator & Logger
+        Start Locator & Syscall Server 
 
     *****************************************************************/   
 
@@ -220,15 +220,14 @@ int main(void) {
 		  UTCBaddress(1) ); 
     printf ("Started with id %lx\n", locatorid.raw);
 
-    /* startup our logger, to be able to put messages on the screen */
-    printf ("Starting logger ... \n");
-    /* Generate some threadid */
-    loggerid = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 2, 1);
-    start_thread (loggerid, 
-		  (L4_Word_t)&logger_server, 
-		  (L4_Word_t)&logger_stack[1023], 
-		  UTCBaddress(2) ); 
-    printf ("Started with id %lx\n", loggerid.raw);
+    /* startup our syscall server */
+    printf("Starting syscall server ... \n");
+    syscallid = L4_GlobalId(L4_ThreadNo(L4_Myself()) + 2, 1);
+    start_thread (syscallid,
+            (L4_Word_t)&syscall_server,
+            (L4_Word_t)&syscall_stack[1023],
+            UTCBaddress(2) );
+    printf("Started with id %lx\n", syscallid.raw);
 
     /* We just bring the in the memory of the bootinfo page */
     if (!request_page (L4_BootInfo (L4_KernelInterface ()))) {

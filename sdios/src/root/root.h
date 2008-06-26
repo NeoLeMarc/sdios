@@ -21,6 +21,7 @@ extern L4_ThreadId_t loggerid;   // messaging service
 
 
 extern void locator_server (void);
-extern void logger_server (void);
+//extern void logger_server (void);
+extern void syscall_server (void);
 extern void pager_loop (void);
 
