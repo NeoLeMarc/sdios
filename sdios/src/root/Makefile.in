@@ -19,9 +19,9 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 
 SRCS=		$(ARCH)-crt0.S \
 		main.cc logger.cc locator.cc \
-		pager.cc
+		pager.cc syscall.cc
 
-IDLS=		locator.idl logger.idl
+IDLS=		locator.idl logger.idl syscall.idl
 
 LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-O 3 -Ttext=$(ROOTTASK_LINKBASE) -T $(top_builddir)/include/$(ARCH)/sdi.ld

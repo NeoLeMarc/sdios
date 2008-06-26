@@ -1,0 +1,20 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_SYSCALL_ID)]
+
+interface IF_SYSCALL{
+    exception noPrivilege{};
+    exception invalidThread{};
+    exception invalidSpace{};
+    exception invalidScheduler{};
+    exception invalidUtcbLocation{};
+    exception invalidKipArea{};
+    exception outOfMemory{};
+
+    L4_Word_t ThreadControl(in L4_ThreadId_t dest, in L4_ThreadId_t SpaceSpecifier, in L4_ThreadId_t scheduler, in L4_ThreadId_t pager, in void* UtcbLocation)
+        raises(noPrivilege, invalidThread, invalidSpace, invalidScheduler, invalidUtcbLocation, outOfMemory);
+
+
+    L4_Word_t SpaceControl(in L4_ThreadId_t SpaceSpacifier, in L4_Word_t control, in L4_Fpage_t KernelInterfacePageArea, in L4_Fpage_t UtcbArea, in L4_ThreadId_t Redirector, out L4_Word_t old_Control)
+            raises(noPrivilege, invalidSpace, invalidUtcbLocation, invalidKipArea);
+};

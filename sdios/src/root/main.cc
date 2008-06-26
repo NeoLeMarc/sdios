@@ -256,7 +256,7 @@ int main(void) {
     L4_BootRec_t* ram_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
-    /* some ELF loading and staring */
+    /* some ELF loading and starting */
     L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
     start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
     printf ("RAM-DSM started with as %lx\n", ram_dsm_id.raw);
@@ -267,7 +267,7 @@ int main(void) {
     L4_BootRec_t* io_dsm_module = find_module (3, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t io_dsm_startip = load_elfimage(io_dsm_module); 
 
-    /* some ELF loading and staring */
+    /* some ELF loading and starting */
     L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
     start_task (io_dsm_id, io_dsm_startip, utcbarea);
     printf ("IO-DSM started with as %lx\n", io_dsm_id.raw);
@@ -278,7 +278,7 @@ int main(void) {
     L4_BootRec_t* nameserver_module = find_module(4, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t nameserver_startip = load_elfimage(nameserver_module); 
 
-    /* some ELF loading and staring */
+    /* some ELF loading and starting */
     L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
     start_task (nameserver_id, nameserver_startip, utcbarea);
     printf ("Nameserver started with as %lx\n", nameserver_id.raw);
@@ -289,7 +289,7 @@ int main(void) {
     L4_BootRec_t* taskserver_module = find_module (5, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
 
-    /* some ELF loading and staring */
+    /* some ELF loading and starting */
     L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
     start_task (taskserver_id, taskserver_startip, utcbarea);
     printf ("Taskserver started with as %lx\n", taskserver_id.raw);
