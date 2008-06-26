@@ -258,7 +258,7 @@ int main(void) {
     /* some ELF loading and starting */
     L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
     start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
-    printf ("RAM-DSM started with as %lx\n", ram_dsm_id.raw);
+    printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
 
@@ -269,7 +269,7 @@ int main(void) {
     /* some ELF loading and starting */
     L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
     start_task (io_dsm_id, io_dsm_startip, utcbarea);
-    printf ("IO-DSM started with as %lx\n", io_dsm_id.raw);
+    printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
 
 
 
@@ -280,7 +280,7 @@ int main(void) {
     /* some ELF loading and starting */
     L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
     start_task (nameserver_id, nameserver_startip, utcbarea);
-    printf ("Nameserver started with as %lx\n", nameserver_id.raw);
+    printf ("Nameserver started with as %lx@%lx\n", nameserver_id.raw, nameserver_module);
 
 
 
@@ -291,7 +291,7 @@ int main(void) {
     /* some ELF loading and starting */
     L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
     start_task (taskserver_id, taskserver_startip, utcbarea);
-    printf ("Taskserver started with as %lx\n", taskserver_id.raw);
+    printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
 
 
 
