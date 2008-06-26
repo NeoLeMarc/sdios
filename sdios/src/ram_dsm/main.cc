@@ -16,9 +16,7 @@
 
 L4_ThreadId_t locatorid; 
 
-int main () {
-    printf ("RAM-DatespaceManager is alive\n");
-
+void RequestPage(int base, int size){
     /* Try to get all memory from sigma0 */
     L4_Msg_t requestMemoryMsg;
 
@@ -28,7 +26,7 @@ int main () {
     registers[1] = 0;
 
     /* Request whole Memory */
-    registers[0] = L4_FpageLog2(-1, 32).raw;
+    registers[0] = L4_FpageLog2(base, size).raw;
 
     /* Put into requestMemoryMsg */
     L4_MsgPut(&requestMemoryMsg, -6 << 4, 2, registers, 0, NULL);
@@ -46,8 +44,15 @@ int main () {
     /* Print response from sigma0 */
     printf("Error Code: %i\n", (int)L4_ErrorCode());
 
-    printf("If you are here, then we propapbly got a mapping from sigma0!\n");
-    
+    printf("If you are here, then you probably got a mapping from sigma0!\n");
+}
+
+int main () {
+    printf ("RAM Dataspace Manager is alive\n");
+
+    /* Try to get Whole Memory from sigma0 */
+    RequestPage(-1, 32);
+
     /* Spin forever */
     while (42);
     

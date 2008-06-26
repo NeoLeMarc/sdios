@@ -250,26 +250,25 @@ int main(void) {
 
     *****************************************************************/   
 
-    
-    /**** RAM Data Space Manager *****/
-    L4_BootRec_t* ram_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-    L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
-
-    /* some ELF loading and starting */
-    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
-    start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
-    printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
-
-
-
     /**** IO Data Space Manager *****/
-    L4_BootRec_t* io_dsm_module = find_module (3, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_BootRec_t* io_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t io_dsm_startip = load_elfimage(io_dsm_module); 
 
     /* some ELF loading and starting */
-    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
     start_task (io_dsm_id, io_dsm_startip, utcbarea);
     printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
+
+
+    
+    /**** RAM Data Space Manager *****/
+    L4_BootRec_t* ram_dsm_module = find_module (3, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
+
+    /* some ELF loading and starting */
+    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
+    printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
 
