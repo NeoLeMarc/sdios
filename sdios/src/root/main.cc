@@ -166,12 +166,27 @@ L4_Word_t load_elfimage (L4_BootRec_t* mod) {
 #define UTCBaddress(x) ((void*)(((L4_Word_t)L4_MyLocalId().raw + utcbsize * (x)) & ~(utcbsize - 1)))
 
 int main(void) {
+
+    /****************************************************************
+     
+       Initialize Root Server 
+
+    *****************************************************************/   
+
     L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
 
     pagerid = L4_Myself ();
     sigma0id = L4_Pager ();
     locatorid = L4_nilthread;
     loggerid = L4_nilthread;
+
+
+
+    /****************************************************************
+     
+        Print Early System Infos
+
+    *****************************************************************/   
 
     printf ("Early system infos:\n");
     printf ("Threads: Myself:%lx Sigma0:%lx\n", L4_Myself ().raw, L4_Pager ().raw);
@@ -186,6 +201,14 @@ int main(void) {
 
     utcbarea = L4_FpageLog2 ((L4_Word_t) L4_MyLocalId ().raw,
 			      L4_UtcbAreaSizeLog2 (kip) + 1);
+
+
+
+    /****************************************************************
+     
+        Start Locator & Logger
+
+    *****************************************************************/   
 
     /* startup our locator */
     printf ("Starting locator ...\n");
@@ -209,24 +232,75 @@ int main(void) {
 
     /* We just bring the in the memory of the bootinfo page */
     if (!request_page (L4_BootInfo (L4_KernelInterface ()))) {
-	// no bootinfo, no chance, no future. Break up
-	panic ("Was not able to get bootinfo");
+    	// no bootinfo, no chance, no future. Break up
+	    panic ("Was not able to get bootinfo");
     }
+
     /* Quick check */
     if (!L4_BootInfo_Valid ((void*)L4_BootInfo (L4_KernelInterface ()))) 
-	panic ("Bootinfo not found");
+	    panic ("Bootinfo not found");
+
     list_modules ((L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
 
-    /* Now we search for the third module, 
-       which will (hopefully) be our testclient */ 
-    L4_BootRec_t* module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-    L4_Word_t startip = load_elfimage (module); 
+
+
+
+    /****************************************************************
+     
+       Start System Servers
+
+    *****************************************************************/   
+
+    
+    /**** RAM Data Space Manager *****/
+    L4_BootRec_t* ram_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
     /* some ELF loading and staring */
+    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
+    start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
+    printf ("RAM-DSM started with as %lx\n", ram_dsm_id.raw);
 
-    L4_ThreadId_t testid = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
-    start_task (testid, startip, utcbarea);
-    printf ("Testclient started with as %lx\n", testid.raw);
+
+
+    /**** IO Data Space Manager *****/
+    L4_BootRec_t* io_dsm_module = find_module (3, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_Word_t io_dsm_startip = load_elfimage(io_dsm_module); 
+
+    /* some ELF loading and staring */
+    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    start_task (io_dsm_id, io_dsm_startip, utcbarea);
+    printf ("IO-DSM started with as %lx\n", io_dsm_id.raw);
+
+
+
+    /**** Nameserver *****/
+    L4_BootRec_t* nameserver_module = find_module(4, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_Word_t nameserver_startip = load_elfimage(nameserver_module); 
+
+    /* some ELF loading and staring */
+    L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
+    start_task (nameserver_id, nameserver_startip, utcbarea);
+    printf ("Nameserver started with as %lx\n", nameserver_id.raw);
+
+
+
+    /**** Taskserver *****/
+    L4_BootRec_t* taskserver_module = find_module (5, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+    L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
+
+    /* some ELF loading and staring */
+    L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
+    start_task (taskserver_id, taskserver_startip, utcbarea);
+    printf ("Taskserver started with as %lx\n", taskserver_id.raw);
+
+
+
+    /****************************************************************
+     
+       Start Pager Loop 
+
+    *****************************************************************/   
 
     /* now it is time to become the pager for all those threads we 
        created recently */
