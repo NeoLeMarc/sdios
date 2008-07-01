@@ -15,6 +15,9 @@
 #include <if/iflocator.h>
 #include <if/iflogging.h>
 
+
+#include "../lib/io/ia32-port.h"
+
 L4_ThreadId_t locatorid; 
 
 void RequestPage(int base, int size){
@@ -27,7 +30,8 @@ void RequestPage(int base, int size){
     registers[1] = 0; //L4_UncacheableMemory;
 
     /* Request whole Memory */
-    registers[0] = L4_Fpage(base, size).raw;
+    L4_Fpage_t fpage = L4_Fpage(base, size);
+    registers[0] = fpage.raw;
 
     /* Put into requestMemoryMsg */
     L4_MsgPut(&requestMemoryMsg, -6 << 4, 2, registers, 0, NULL);
@@ -36,7 +40,7 @@ void RequestPage(int base, int size){
     L4_Load(&requestMemoryMsg);
 
     /* Accept mapping idempotently */
-    L4_Accept(L4_MapGrantItems(L4_Fpage(base, size)));
+    L4_Accept(L4_MapGrantItems(fpage));
 
     /* Send & Receive IPC */
     L4_ThreadId_t sigma0 = L4_GlobalId(0x000c0001 >> 14, 1);
@@ -76,6 +80,33 @@ int main () {
         }
     }
     printf("Finished searching for architecture spefic memory!\n");
+
+    // Check for PCI-Bus
+    /* 
+    L4_Word32_t pcireg = inb(0xcfc);
+    if(pcireg == 0xff){
+        printf("There is something in the PCI space! Trying to fetch device information!\n");
+
+        L4_Word_t pciCommand = (0x8000 << 16 | 0x0 << 11 | 0x0 << 8 | 0x00);
+        outb(0xCF8, pciCommand);
+        pcireg = inb(0xcfc);
+
+        printf("Got response: %x\n", pcireg);
+
+        // Printing some stuff from BDA
+        unsigned short * pixel = (unsigned short * )0xb8000;
+        * pixel = ('A' | 129 << 8); 
+        
+        pixel += 1;
+        * pixel = ('A' | 255 << 8); 
+
+       
+
+
+    } else {
+        printf("No PCI Bus found!\n");
+    }
+    */
    
     /* Spin forever */
     while (42);
