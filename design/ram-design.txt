@@ -1,0 +1,18 @@
+vorläufiges Design MEM-Server/RAM-DSM/ELF-Loader
+
+RT startet Pager für RAM-DSM
+
+Root-Task startet RAM-DSM (pager auf Root-Task) vollständig
+
+RAM-DSM initialisiert
+
+RAM-DSM startet ELF-Loader
+
+für jedes zu startende Modul:
+ RT legt neue Tasks an
+ schickt Nachricht mit TID und Modul-ID an RAM-DSM
+ RAM-DSM schickt Modul-ID weiter an ELF-Loader
+ ELF-Loader liefert Start-IP zurück
+ RAM-DSM versendet Startup-IPC
+
+RAM-DSM geht in Pager-Loop
