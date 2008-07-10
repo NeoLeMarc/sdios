@@ -13,6 +13,7 @@
 #include <idl4glue.h>
 #include <if/iflocator.h>
 #include <if/iflogging.h>
+#include "ram_dsm.h"
 
 L4_ThreadId_t locatorid; 
 
@@ -52,6 +53,11 @@ int main () {
 
     /* Try to get Whole Memory from sigma0 */
     RequestPage(-1, 32);
+
+    /* Start Pager */
+    printf("Starting pager...\n");
+    pager_server();
+    printf("Oooops, your pager just died!\n");
 
     /* Spin forever */
     while (42);

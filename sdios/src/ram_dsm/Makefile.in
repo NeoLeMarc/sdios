@@ -18,9 +18,10 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_srcdir)/include/$(ARCH)/sdi.ld
 
 SRCS=		$(ARCH)-crt0.S \
-		main.cc
+		main.cc \
+        pager.cc
 
-IDLS=           
+IDLS=          pager.idl 
 
 LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-Ttext=00600000 -T $(top_builddir)/include/$(ARCH)/sdi.ld
