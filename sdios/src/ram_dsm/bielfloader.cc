@@ -7,8 +7,11 @@
  * Report bugs to haeberlen@ira.uka.de
  *****************************************************************/
 
+#include <l4/bootinfo.h>
 #include <idl4glue.h>
 #include <l4io.h>
+#include <elf.h>
+
 #include "bielfloader-server.h"
 
 
@@ -37,8 +40,35 @@ L4_Word_t getModuleId(L4_ThreadId_t thread){
     for(int i = 0; i < associationFreePos; i++)
         if(associationTable[i].thread == thread)
             return associationTable[i].module;
-    return -1;
+    // FIXME: Hier brauchen wir einen richtigen Fehler
+    return 0;
 }
+
+/* ELF Helper Functions */
+void elfLoadHeader(Elf32_Ehdr * hdr, L4_BootRec_t * mod){
+    /* Check type of module */
+    if (L4_Type (mod) != L4_BootInfo_Module)
+        panic ("[RAM-DSM-BIELFLOADER] Wrong module type");
+   
+
+    /* Load Header from ELF File */
+    hdr = (Elf32_Ehdr*)L4_Module_Start (mod);
+    
+    return;
+}
+
+L4_BootRec_t * find_module (unsigned int index, const L4_BootInfo_t* bootinfo) {
+    if (L4_BootInfo_Entries (bootinfo) < index) 
+        panic ("Some modules are missing");
+
+    L4_BootRec_t* bootrec = L4_BootInfo_FirstEntry (bootinfo);
+
+    for (unsigned int i = 0; i < index; i++)
+        bootrec = L4_Next (bootrec);
+    return bootrec;
+}
+
+/* END OF ELF Helper Functions */
 
 
 /* Interface bielfloader */
@@ -47,7 +77,7 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
 {
   /* implementation of IF_PAGEFAULT::pagefault */
-  printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", _caller.raw, address);  
+  printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", (unsigned int)_caller.raw, (unsigned int)address);  
 
   
   return;
@@ -66,7 +96,15 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
   association.module = bootModuleId;
 
   appendToAssociationTable(association);
-    
+
+  // Load Image Header
+  L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
+
+  Elf32_Ehdr * hdr = 0;
+  elfLoadHeader(hdr, module);
+
+  // Set instruction pointer
+  * initialIp = hdr->e_entry;
 
   return;
 }
