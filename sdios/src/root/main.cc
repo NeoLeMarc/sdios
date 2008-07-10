@@ -58,6 +58,19 @@ L4_ThreadId_t start_thread (L4_ThreadId_t threadid, L4_Word_t ip, L4_Word_t sp, 
     return threadid;
 }
 
+/* FIXME: Löschen! */
+L4_ThreadId_t start_threadTEST (L4_ThreadId_t threadid, L4_Word_t ip, L4_Word_t sp, void* utcblocation) {
+    printf ("New thread with ip:%lx / sp:%lx\n", ip, sp);
+    /* do the ThreadControl call */
+    if (!L4_ThreadControl (threadid, L4_Myself (),  L4_Myself (), L4_GlobalId(L4_ThreadNo(L4_Myself()) + 4, 1),
+		      (void*)utcblocation ))
+	panic ("ThreadControl failed");
+    /* set thread on our code */
+    L4_Start (threadid, sp, ip);
+
+    return threadid;
+}
+
 L4_ThreadId_t start_task (L4_ThreadId_t threadid, L4_Word_t ip, L4_Fpage_t nutcbarea) {
     printf ("New task with ip:%lx\n", ip);
     /* First ThreadControl to setup initial thread */
@@ -292,6 +305,18 @@ int main(void) {
     start_task (taskserver_id, taskserver_startip, utcbarea);
     printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
 
+
+    /****** RAM-DSM PAGEFAULT TEST *******/
+    /* startup our locator */
+    printf ("****************** Starting locator to test Pagefaults...\n");
+    /* Generate some threadid */
+    locatorid = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 7, 1);
+    start_threadTEST (locatorid, 
+		  0xffffff , 
+		  (L4_Word_t)&locator_stack[1023], 
+		  UTCBaddress(1) ); 
+    printf ("Started with id %lx\n", locatorid.raw);
+    /****** END OF RAM-DSM PAGEFAULT TEST *******/
 
 
     /****************************************************************

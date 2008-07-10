@@ -19,9 +19,10 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 
 SRCS=		$(ARCH)-crt0.S \
 		main.cc \
-        pager.cc
+        pager.cc \
+		bielfloader.cc
 
-IDLS=          pager.idl 
+IDLS=          pager.idl bielfloader.idl
 
 LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-Ttext=00600000 -T $(top_builddir)/include/$(ARCH)/sdi.ld

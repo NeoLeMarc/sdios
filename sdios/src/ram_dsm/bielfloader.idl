@@ -1,0 +1,7 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <ifpagefault.idl>
+#include <ifbielfloader.idl>
+
+interface bielfloader : IF_PAGEFAULT, IF_BIELFLOADER {
+};

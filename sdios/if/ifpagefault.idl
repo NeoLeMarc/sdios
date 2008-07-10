@@ -1,0 +1,12 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_PAGEFAULT_ID)]
+
+interface IF_PAGEFAULT{
+    [kernelmsg(idl4::pagefault)]
+	void	pagefault(in L4_Word_t address,
+					  in L4_Word_t ip,
+					  in L4_Word_t privileges,
+					  out fpage page);
+
+};
