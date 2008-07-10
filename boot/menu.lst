@@ -1,3 +1,5 @@
+default 0
+timeout 0
 
 title SdiOS
 root (nd)
@@ -6,4 +8,7 @@ kernel /home/marcel/sdi/boot/kickstart
 module /home/marcel/sdi/boot/ia32-kernel
 module /home/marcel/sdi/boot/sigma0
 module /home/marcel/sdi/boot/root
-module /home/marcel/sdi/boot/test2
+module /home/marcel/sdi/boot/io_dsm
+module /home/marcel/sdi/boot/ram_dsm
+module /home/marcel/sdi/boot/nameserver
+module /home/marcel/sdi/boot/taskserver
