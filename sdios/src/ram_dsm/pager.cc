@@ -18,6 +18,12 @@ IDL4_INLINE void pager_pagefault_implementation(CORBA_Object _caller, const L4_W
 
 {
   /* implementation of IF_PAGEFAULT::pagefault */
+
+  // 1. Get empty page
+  // 2. Map empty page into transport area of ELF-Loader
+  // 3. Delegate Pagefault to ELF-Loader
+  // 4. Unmap filled page from ELF-Loader
+  // 5. Map page to thread, which has raised the pagefault
   printf("[RAM-DSM-PAGER] Received pagefault from 0x%x at 0x%x\n", _caller.raw, address);  
 
   return;
