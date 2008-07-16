@@ -10,6 +10,8 @@
 #include <l4/ipc.h>
 #include <l4/sigma0.h>
 #include <l4/bootinfo.h>
+#include <l4/types.h>
+#include <l4/schedule.h>
 
 #include <stdlib.h>
 
@@ -23,7 +25,6 @@
 
 /* local threadids */
 L4_ThreadId_t sigma0id;
-L4_ThreadId_t pagerid;
 L4_ThreadId_t locatorid;
 L4_ThreadId_t syscallid;
 
@@ -44,9 +45,10 @@ extern char __heap_end;
 
 L4_Word_t syscall_stack[1024];
 L4_Word_t locator_stack[1024];
+L4_Word_t ram_dsm_pager_stack[1024];
 
 
-L4_ThreadId_t start_thread (L4_ThreadId_t threadid, L4_Word_t ip, L4_Word_t sp, void* utcblocation) {
+L4_ThreadId_t start_thread (L4_ThreadId_t threadid, L4_Word_t ip, L4_Word_t sp, L4_ThreadId_t pagerid, void* utcblocation) {
     printf ("New thread with ip:%lx / sp:%lx\n", ip, sp);
     /* do the ThreadControl call */
     if (!L4_ThreadControl (threadid, L4_Myself (),  L4_Myself (), pagerid,
@@ -58,7 +60,7 @@ L4_ThreadId_t start_thread (L4_ThreadId_t threadid, L4_Word_t ip, L4_Word_t sp, 
     return threadid;
 }
 
-L4_ThreadId_t start_task (L4_ThreadId_t threadid, L4_Word_t ip, L4_Fpage_t nutcbarea) {
+L4_ThreadId_t start_task (L4_ThreadId_t threadid, L4_Word_t ip, L4_ThreadId_t pagerid, L4_Fpage_t nutcbarea) {
     printf ("New task with ip:%lx\n", ip);
     /* First ThreadControl to setup initial thread */
     if (!L4_ThreadControl (threadid, threadid, L4_Myself (), L4_nilthread, (void*)-1UL))
@@ -71,15 +73,20 @@ L4_ThreadId_t start_task (L4_ThreadId_t threadid, L4_Word_t ip, L4_Fpage_t nutcb
 	panic ("SpaceControl failed\n");
 
     /* Second ThreadControl, activate thread */
-    if (!L4_ThreadControl (threadid, threadid, L4_nilthread, L4_Myself (), 
+    if (!L4_ThreadControl (threadid, threadid, L4_nilthread, pagerid, 
 			   (void*)L4_Address (nutcbarea)))
 	panic ("ThreadControl failed\n");
 
     /* send startup IPC */
+    /* only the pager of the thread can send the startup IPC - we have to use IPC Propagation */
     L4_Msg_t msg;
     L4_Clear (&msg);
+    L4_MsgTag_t mtag;
+    L4_Set_Propagation (&mtag);
+    L4_Set_VirtualSender (pagerid);
     L4_Append (&msg, ip);
     L4_Append (&msg, (0));
+    L4_Set_MsgTag (&msg, mtag);
     L4_Load (&msg);
     L4_Send (threadid);
 
@@ -162,6 +169,12 @@ L4_Word_t load_elfimage (L4_BootRec_t* mod) {
     return (hdr->e_entry);
 }
 
+/* Kills the specified Thread. 
+ * Returns: true = success, false = unsuccessful */
+bool kill (L4_ThreadId_t tid) {
+   return L4_ThreadControl (tid, L4_nilthread, L4_nilthread, L4_nilthread, (void*)-1UL);
+}
+
 
 #define UTCBaddress(x) ((void*)(((L4_Word_t)L4_MyLocalId().raw + utcbsize * (x)) & ~(utcbsize - 1)))
 
@@ -175,7 +188,6 @@ int main(void) {
 
     L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
 
-    pagerid   = L4_Myself ();
     sigma0id  = L4_Pager ();
     locatorid = L4_nilthread;
     syscallid = L4_nilthread;
@@ -216,7 +228,8 @@ int main(void) {
     locatorid = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 1, 1);
     start_thread (locatorid, 
 		  (L4_Word_t)&locator_server, 
-		  (L4_Word_t)&locator_stack[1023], 
+		  (L4_Word_t)&locator_stack[1023],
+		  L4_Pager(),
 		  UTCBaddress(1) ); 
     printf ("Started with id %lx\n", locatorid.raw);
 
@@ -226,6 +239,7 @@ int main(void) {
     start_thread (syscallid,
             (L4_Word_t)&syscall_server,
             (L4_Word_t)&syscall_stack[1023],
+	    L4_Pager(),
             UTCBaddress(2) );
     printf("Started with id %lx\n", syscallid.raw);
 
@@ -250,13 +264,23 @@ int main(void) {
 
     *****************************************************************/   
 
+    /**** Start Pager-Thread for the RAM-DSM *****/
+    L4_ThreadId_t ram_dsm_pager_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
+    printf("Starting RAM-DSM Pager with TID: %lx\n", ram_dsm_pager_id.raw);
+    start_thread (ram_dsm_pager_id,
+            (L4_Word_t)&pager_loop,
+            (L4_Word_t)&ram_dsm_pager_stack[1023],
+	    L4_Pager(),
+            UTCBaddress(3) );
+    
+
     /**** IO Data Space Manager *****/
     L4_BootRec_t* io_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t io_dsm_startip = load_elfimage(io_dsm_module); 
 
     /* some ELF loading and starting */
-    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
-    start_task (io_dsm_id, io_dsm_startip, utcbarea);
+    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    start_task (io_dsm_id, io_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
 
 
@@ -266,8 +290,8 @@ int main(void) {
     L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
     /* some ELF loading and starting */
-    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
-    start_task (ram_dsm_id, ram_dsm_startip, utcbarea);
+    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
+    start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
@@ -277,8 +301,8 @@ int main(void) {
     L4_Word_t nameserver_startip = load_elfimage(nameserver_module); 
 
     /* some ELF loading and starting */
-    L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
-    start_task (nameserver_id, nameserver_startip, utcbarea);
+    L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
+    start_task (nameserver_id, nameserver_startip, ram_dsm_pager_id, utcbarea);
     printf ("Nameserver started with as %lx@%lx\n", nameserver_id.raw, nameserver_module);
 
 
@@ -288,9 +312,12 @@ int main(void) {
     L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
 
     /* some ELF loading and starting */
-    L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
-    start_task (taskserver_id, taskserver_startip, utcbarea);
+    L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 7, 1);
+    start_task (taskserver_id, taskserver_startip, ram_dsm_pager_id, utcbarea);
     printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
+    // Taskserver needs high Priority because you can set Prios only to values smaller or equal your own
+    L4_Set_Priority((L4_ThreadId_t) taskserver_id, (L4_Word_t) 255);
+    printf("Taskserver Priority set to 255\n"); 
 
     /****************************************************************
      
@@ -300,7 +327,24 @@ int main(void) {
 
     /* now it is time to become the pager for all those threads we 
        created recently */
-    pager_loop();
+    /* There is nothing left to page :( 
+     * Unfortunately its not possible to kill the rootthread so we have to idle.
+     * WARNING: busy waiting with threads that have different priorities is evil! (starvation) */
+    L4_Set_Priority(L4_Myself(), (L4_Word_t) 100);
+    L4_Time_t t = L4_TimePeriod (1000000);
+    printf("roottask Priority set to 100\n"); 
+    while (42) {
+        L4_Sleep (t);
+        L4_Yield ();
+    }
+
+    
+   // printf("try to kill the \"rootthread\"...\n");
+   // if (kill (L4_Myself ())) {
+   //     printf("\"rootthread\" successfully killed\n");}
+   // else {
+   //     printf("\"rootthread\" could not be killed. Error Code: %d \n", L4_ErrorCode ());
+   // }
 
     panic ("Unexpected return from PagerLoop()");
 }
