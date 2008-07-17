@@ -23,6 +23,8 @@
 
 #include <idl4glue.h>
 
+#include <if/ifbielfloader.h>
+
 /* local threadids */
 L4_ThreadId_t sigma0id;
 L4_ThreadId_t locatorid;
@@ -264,60 +266,66 @@ int main(void) {
 
     *****************************************************************/   
 
-    /**** Start Pager-Thread for the RAM-DSM *****/
+    // Start Pager-Thread for the RAM-DSM 
     L4_ThreadId_t ram_dsm_pager_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
     printf("Starting RAM-DSM Pager with TID: %lx\n", ram_dsm_pager_id.raw);
     start_thread (ram_dsm_pager_id,
             (L4_Word_t)&pager_loop,
             (L4_Word_t)&ram_dsm_pager_stack[1023],
-	    L4_Pager(),
+    	    L4_Pager(),
             UTCBaddress(3) );
-    
 
-    /**** IO Data Space Manager *****/
-    L4_BootRec_t* io_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-    L4_Word_t io_dsm_startip = load_elfimage(io_dsm_module); 
-
-    /* some ELF loading and starting */
-    L4_ThreadId_t io_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
-    start_task (io_dsm_id, io_dsm_startip, ram_dsm_pager_id, utcbarea);
-    printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
-
-
-    
-    /**** RAM Data Space Manager *****/
+    // RAM Data Space Manager (Which is our ELF-Loader at the Moment)
     L4_BootRec_t* ram_dsm_module = find_module (3, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
-    /* some ELF loading and starting */
+    // some ELF loading and starting 
     L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
     start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
+    // Register module of IO Data Space Manager
+    L4_ThreadId_t io_dsm_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    L4_Word_t io_dsm_startip = 0; 
 
-    /**** Nameserver *****/
+    CORBA_Environment env (idl4_default_environment);
+    IF_BIELFLOADER_associateImage( (CORBA_Object)ram_dsm_id, &io_dsm_id, 2, &io_dsm_startip, &env);
+    printf("Root-Task is still alive!");
+
+/*
+    // IO Data Space Manager
+//    L4_BootRec_t* io_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
+
+    // some ELF loading and starting
+//   start_task (io_dsm_id, io_dsm_startip, ram_dsm_pager_id, utcbarea);
+//    printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
+
+
+
+    // Nameserver 
     L4_BootRec_t* nameserver_module = find_module(4, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t nameserver_startip = load_elfimage(nameserver_module); 
 
-    /* some ELF loading and starting */
+    // some ELF loading and starting 
     L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
     start_task (nameserver_id, nameserver_startip, ram_dsm_pager_id, utcbarea);
     printf ("Nameserver started with as %lx@%lx\n", nameserver_id.raw, nameserver_module);
 
 
 
-    /**** Taskserver *****/
+    // Taskserver 
     L4_BootRec_t* taskserver_module = find_module (5, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
 
-    /* some ELF loading and starting */
+    // some ELF loading and starting
     L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 7, 1);
     start_task (taskserver_id, taskserver_startip, ram_dsm_pager_id, utcbarea);
     printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
     // Taskserver needs high Priority because you can set Prios only to values smaller or equal your own
     L4_Set_Priority((L4_ThreadId_t) taskserver_id, (L4_Word_t) 255);
     printf("Taskserver Priority set to 255\n"); 
+    */
 
     /****************************************************************
      

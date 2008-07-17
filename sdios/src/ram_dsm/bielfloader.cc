@@ -89,6 +89,7 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
 {
   /* implementation of IF_BIELFLOADER::associateImage */
+  printf("Entering associate image...");  
 
   // Insert association in association table  
   association_t association;
@@ -105,6 +106,7 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
   // Set instruction pointer
   * initialIp = hdr->e_entry;
+  printf("... leaving associate image!");
 
   return;
 }

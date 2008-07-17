@@ -54,10 +54,16 @@ int main () {
     /* Try to get Whole Memory from sigma0 */
     RequestPage(-1, 32);
 
+    // Start BI-ELF-Loader
+    printf("Start Boot-Image-ELF-Loader...\n");
+    bielfloader_server();
+    printf("Oooooooops, your ELF-Loader just died!\n");
+
+
     /* Start Pager */
-    printf("Starting pager...\n");
-    pager_server();
-    printf("Oooops, your pager just died!\n");
+//    printf("Starting pager...\n");
+//    pager_server();
+//    printf("Oooops, your pager just died!\n");
 
     /* Spin forever */
     while (42);
