@@ -8,6 +8,7 @@
  *****************************************************************/
 
 #include <l4/bootinfo.h>
+#include <l4/types.h>
 #include <idl4glue.h>
 #include <l4io.h>
 #include <elf.h>
@@ -26,6 +27,8 @@ typedef struct {
 association_t associationTable[ASSOC_TABLE_SIZE];
 int associationFreePos = 0;
 
+L4_Word_t * available;
+L4_Word_t lastFreePageBase = 0;
 
 void appendToAssociationTable(const association_t association){
     if(associationFreePos < ASSOC_TABLE_SIZE - 1)
@@ -43,6 +46,17 @@ L4_Word_t getModuleId(L4_ThreadId_t thread){
     // FIXME: Hier brauchen wir einen richtigen Fehler
     return 0;
 }
+
+L4_FPage_t getFreePage() {
+    for (L4_Word_t i = lastFreePageBase; i < 0x02000000UL; i += 0x1000UL) {
+        if ( *available[i >> 17] & (1UL << ((i >> 12) & 0x1fUL))) {
+            available[i >> 17] &= ~(1UL << ((i >> 12) & 0x1fUL));
+            return L4_FpageLog2(i, 12);
+        }
+    }
+    return L4_Nilpage;
+}
+
 
 /* ELF Helper Functions */
 void elfLoadHeader(Elf32_Ehdr * hdr, L4_BootRec_t * mod){
@@ -76,10 +90,70 @@ L4_BootRec_t * find_module (unsigned int index, const L4_BootInfo_t* bootinfo) {
 IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, const L4_Word_t address, const L4_Word_t ip, const L4_Word_t privileges, idl4_fpage_t *page, idl4_server_environment *_env)
 
 {
-  /* implementation of IF_PAGEFAULT::pagefault */
+  // implementation of IF_PAGEFAULT::pagefault
   printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", (unsigned int)_caller.raw, (unsigned int)address);  
 
+  // determine boot image
+  L4_Word_t moduleId = getModuleId((L4_ThreadId_t)_caller);
+  if (moduleId == 0) {
+      // error handling
+  }
+  L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
   
+  // load ELF header
+  Elf32_Ehdr * hdr = 0;
+  elfLoadHeader(hdr, module);
+
+
+  // find relevant ELF section
+  Elf32_Phdr * phdr = (hdr->e_phoff + (unsigned int)hdr);
+
+  for(int i = 0; i < hdr->e_phnum; i++)
+      if(phdr[i].p_type == PT_LOAD){
+
+          // Is Page-Fault adresse in section?
+          if((address >= phdr[i].p_vaddr) && (phdr[i].p_vaddr + phdr[i].p_memsz >= address)){
+
+            // copy relevant page from section into to-be-mapped paged
+            L4_Word_t offset  = (address & 0xfffff000UL) - phdr[i].p_vaddr; // Aligned offset of page
+
+            L4_Fpage_t page = getFreePage();
+            if (L4_IsNilFpage(page)) {
+                panic("[RAM-DSM-BIELFLOADER] Out Of Memory in pagefault handling\n");
+            }
+
+            // start of to-be-copied data in memory
+            L4_Word_t pagePos = (L4_Word_t) hdr + phdr[i].p_offset + offset;
+            L4_Word_t copySize = phdr[i].p_filesz - offset;
+            L4_Word_t padSize = 0;
+            if (copySize > 0x1000UL) {
+                copySize = 0x1000UL;
+            } else {
+                padSize = 0x1000UL - copySize;
+            }
+
+            // was ist bei einem programmteil, der nur zum teil in der page liegt?
+            // mehrere programmteile, die in der page aufeinanderstoßen?
+
+            // Copy from image to page
+            memcpy((void*) L4_Address(page), offset, phdr[i].p_filesz);
+            
+            // Fill remaining page with zeroes
+               
+                // FIXME: Get page + copy
+
+                // FIXME: Get page + copy
+
+            // Work is done, break loop + return
+            return; 
+              
+          }
+      }
+
+  // If we get here, than section was not found in Image
+  // Return a zero filled page
+  
+  // FIXME: Get page + copy
   return;
 }
 
@@ -118,9 +192,10 @@ void *bielfloader_vtable_discard[BIELFLOADER_DEFAULT_VTABLE_SIZE] = BIELFLOADER_
 void **bielfloader_itable[8] = { bielfloader_vtable_discard, bielfloader_vtable_discard, bielfloader_vtable_discard, bielfloader_vtable_discard, bielfloader_vtable_discard, bielfloader_vtable_5, bielfloader_vtable_discard, bielfloader_vtable_discard };
 void *bielfloader_ktable[BIELFLOADER_DEFAULT_KTABLE_SIZE] = BIELFLOADER_DEFAULT_KTABLE;
 
-void bielfloader_server(void)
+void bielfloader_server(L4_Word_t * available_p)
 
 {
+    available = available_p;
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;
   idl4_msgbuf_t msgbuf;
