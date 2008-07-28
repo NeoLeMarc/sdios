@@ -117,6 +117,8 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
   memset((void *)L4_Address(page), 0, L4_Size(page));
 
+  printf("Page zeroed.\n");
+
   // find and copy relevant ELF sections
   Elf32_Phdr * phdr = (Elf32_Phdr *)(hdr->e_phoff + hdr);
   for(int i = 0; i < hdr->e_phnum; i++){
@@ -155,11 +157,12 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   }
 
   // Set return page
+  idl4_fpage_set_mode(return_page, IDL4_MODE_MAP);
   idl4_fpage_set_page(return_page, page);
+  idl4_fpage_set_base(return_page, page_end);
+  idl4_fpage_set_permissions(return_page, IDL4_PERM_FULL);
 
-  //hackhackhack: set w and x bit manually
-  return_page->fpage |= 3;
-
+  printf("About to return.\n");
   return;
 }
 
