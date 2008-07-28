@@ -26,16 +26,14 @@ L4_Word_t available[AVAILABLE_BITMAP_SIZE];
 int main () {
     printf ("RAM Dataspace Manager is alive\n");
 
-    /* Try to get Whole Memory from sigma0 */
-    for (L4_Word_t i = 0UL; i < 0x02000000UL; i += 0x1000UL) {
-        if (!L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, L4_FpageLog2(0UL, 12), L4_FpageLog2(0UL, 12)))) {
-            // page size is 2^12, 2^5 bits per word
-            available[i >> 17] |= (1UL << ((i >> 12) & 0x1fUL));
-        }
+    // Try to get whole memory from sigma0
+    for (L4_Word_t i = 0x00100000UL; i < 0x02000000UL; i += 0x1000UL) {
+      if (!L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, L4_FpageLog2(i, 12), L4_FpageLog2(i, 12)))) {
+        // page size is 2^12, 2^5 bits per word
+        available[i >> 17] |= (1UL << ((i >> 12) & 0x1fUL));
+      }
     }
 
-    printf("RAM-DSM ready to start BI ELF loader\n");
-    L4_KDB_Enter("nap");
     // Start BI-ELF-Loader
     printf("Start Boot-Image-ELF-Loader...\n");
     bielfloader_server(available);

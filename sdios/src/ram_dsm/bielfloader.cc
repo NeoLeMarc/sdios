@@ -109,6 +109,7 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
   // reserve and zero free page
   L4_Fpage_t page = getFreePage();
+  printf("Got free fpage at %lx\n", L4_Address(page));
 
   if (L4_IsNilFpage(page)) {
       panic("[RAM-DSM-BIELFLOADER] Out Of Memory in pagefault handling\n");
@@ -180,21 +181,16 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
   // Load Image Header
   L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
 
-  printf("Module description is at 0x%lx\n", module);
-
   Elf32_Ehdr * hdr = 0;
   elfLoadHeader(&hdr, module);
 
-  printf("Module starts at 0x%lx\n", hdr);
-
   // Set instruction pointer
-  printf("Initial IP as in image: 0x%lx\n", hdr->e_entry);
   * initialIp = hdr->e_entry;
 
   // Send startup IPC
   L4_Msg_t msg;
   L4_Clear(&msg);
-  L4_Append(&msg, 0x204UL);
+  L4_Append(&msg, (L4_Word_t)hdr->e_entry);
   L4_Append(&msg, 0);
   L4_Load(&msg);
   L4_Send(*thread);
