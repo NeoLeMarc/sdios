@@ -27,7 +27,7 @@ typedef struct {
 association_t associationTable[ASSOC_TABLE_SIZE];
 int associationFreePos = 0;
 
-L4_Word_t * available;
+L4_Word_t * available_b;
 L4_Word_t lastFreePageBase = 0;
 
 void appendToAssociationTable(const association_t association){
@@ -47,10 +47,10 @@ L4_Word_t getModuleId(L4_ThreadId_t thread){
     return 0;
 }
 
-L4_FPage_t getFreePage() {
+L4_Fpage_t getFreePage() {
     for (L4_Word_t i = lastFreePageBase; i < 0x02000000UL; i += 0x1000UL) {
-        if ( *available[i >> 17] & (1UL << ((i >> 12) & 0x1fUL))) {
-            available[i >> 17] &= ~(1UL << ((i >> 12) & 0x1fUL));
+        if ( available_b[i >> 17] & (1UL << ((i >> 12) & 0x1fUL))) {
+            available_b[i >> 17] &= ~(1UL << ((i >> 12) & 0x1fUL));
             return L4_FpageLog2(i, 12);
         }
     }
@@ -87,7 +87,7 @@ L4_BootRec_t * find_module (unsigned int index, const L4_BootInfo_t* bootinfo) {
 
 /* Interface bielfloader */
 
-IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, const L4_Word_t address, const L4_Word_t ip, const L4_Word_t privileges, idl4_fpage_t *page, idl4_server_environment *_env)
+IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, const L4_Word_t address, const L4_Word_t ip, const L4_Word_t privileges, idl4_fpage_t *return_page, idl4_server_environment *_env)
 
 {
   // implementation of IF_PAGEFAULT::pagefault
@@ -98,62 +98,64 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   if (moduleId == 0) {
       // error handling
   }
-  L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
+  L4_BootRec_t * module = find_module(moduleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
   
   // load ELF header
   Elf32_Ehdr * hdr = 0;
   elfLoadHeader(hdr, module);
 
+  L4_Word_t page_start = address & 0xfffff000UL;
+  L4_Word_t page_end   = address | 0x00000fffUL;
 
-  // find relevant ELF section
-  Elf32_Phdr * phdr = (hdr->e_phoff + (unsigned int)hdr);
+  // reserve and zero free page
+  L4_Fpage_t page = getFreePage();
 
-  for(int i = 0; i < hdr->e_phnum; i++)
+  if (L4_IsNilFpage(page)) {
+      panic("[RAM-DSM-BIELFLOADER] Out Of Memory in pagefault handling\n");
+  }
+
+  memset((void *)L4_Address(page), 0, L4_Size(page));
+
+  // find and copy relevant ELF sections
+  Elf32_Phdr * phdr = (Elf32_Phdr *)(hdr->e_phoff + hdr);
+  for(int i = 0; i < hdr->e_phnum; i++){
       if(phdr[i].p_type == PT_LOAD){
 
-          // Is Page-Fault adresse in section?
-          if((address >= phdr[i].p_vaddr) && (phdr[i].p_vaddr + phdr[i].p_memsz >= address)){
+          // Do page and program section overlap?
+          if((page_end >= phdr[i].p_vaddr) // Page ends after section start
+                  && (phdr[i].p_vaddr + phdr[i].p_memsz > page_start)){ // and vice versa
 
-            // copy relevant page from section into to-be-mapped paged
-            L4_Word_t offset  = (address & 0xfffff000UL) - phdr[i].p_vaddr; // Aligned offset of page
-
-            L4_Fpage_t page = getFreePage();
-            if (L4_IsNilFpage(page)) {
-                panic("[RAM-DSM-BIELFLOADER] Out Of Memory in pagefault handling\n");
+            // compute copy source start
+            L4_Word_t s_offset = 0;
+            if (phdr[i].p_vaddr < page_start) {
+              s_offset  = page_start - phdr[i].p_vaddr; // Aligned offset of page
             }
 
-            // start of to-be-copied data in memory
-            L4_Word_t pagePos = (L4_Word_t) hdr + phdr[i].p_offset + offset;
-            L4_Word_t copySize = phdr[i].p_filesz - offset;
-            L4_Word_t padSize = 0;
-            if (copySize > 0x1000UL) {
-                copySize = 0x1000UL;
-            } else {
-                padSize = 0x1000UL - copySize;
+            // compute copy destination start
+            L4_Word_t d_offset = 0;
+            if (phdr[i].p_vaddr > page_start) {
+              d_offset = phdr[i].p_vaddr - page_start;
             }
 
-            // was ist bei einem programmteil, der nur zum teil in der page liegt?
-            // mehrere programmteile, die in der page aufeinanderstoßen?
+            // determine amount to copy
+            L4_Word_t s_max = phdr[i].p_filesz - s_offset;
+            L4_Word_t d_max = 0x1000UL - d_offset;
+            L4_Word_t copylength = (s_max > d_max) ? d_max : s_max;
+
+            // add respective base addresses
+            s_offset += (L4_Word_t)hdr + phdr[i].p_offset;
+            d_offset += L4_Address(page);
 
             // Copy from image to page
-            memcpy((void*) L4_Address(page), offset, phdr[i].p_filesz);
+            memcpy((void *)d_offset, (void *)s_offset, copylength);
             
-            // Fill remaining page with zeroes
-               
-                // FIXME: Get page + copy
-
-                // FIXME: Get page + copy
-
-            // Work is done, break loop + return
-            return; 
-              
           }
       }
+  }
 
-  // If we get here, than section was not found in Image
-  // Return a zero filled page
-  
-  // FIXME: Get page + copy
+  // Set return page
+  idl4_fpage_set_page(return_page, page);
+
   return;
 }
 
@@ -180,6 +182,16 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
   // Set instruction pointer
   * initialIp = hdr->e_entry;
+
+  // Send startup IPC
+  L4_Msg_t msg;
+  L4_Clear(&msg);
+  L4_Append(&msg, (L4_Word_t)hdr->e_entry); // Start IP
+  L4_Append(&msg, 0);
+  L4_Load(&msg);
+  L4_Send(*thread);
+
+
   printf("... leaving associate image!");
 
   return;
@@ -195,7 +207,7 @@ void *bielfloader_ktable[BIELFLOADER_DEFAULT_KTABLE_SIZE] = BIELFLOADER_DEFAULT_
 void bielfloader_server(L4_Word_t * available_p)
 
 {
-    available = available_p;
+  available_b = available_p;
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;
   idl4_msgbuf_t msgbuf;

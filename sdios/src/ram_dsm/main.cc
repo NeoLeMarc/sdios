@@ -21,7 +21,7 @@ L4_ThreadId_t locatorid;
 // Bitmap to store available state
 // calculate bitmap size via RAM size / 4KB (page size) / 32 (bits per word) 
 #define AVAILABLE_BITMAP_SIZE 256
-L4_Word_t available[ASSIGNED_BITMAP_SIZE];
+L4_Word_t available[AVAILABLE_BITMAP_SIZE];
 
 int main () {
     printf ("RAM Dataspace Manager is alive\n");
@@ -34,9 +34,11 @@ int main () {
         }
     }
 
+    printf("RAM-DSM ready to start BI ELF loader\n");
+    L4_KDB_Enter();
     // Start BI-ELF-Loader
     printf("Start Boot-Image-ELF-Loader...\n");
-    bielfloader_server(&available);
+    bielfloader_server(available);
     printf("Oooooooops, your ELF-Loader just died!\n");
 
 
