@@ -59,14 +59,14 @@ L4_Fpage_t getFreePage() {
 
 
 /* ELF Helper Functions */
-void elfLoadHeader(Elf32_Ehdr * hdr, L4_BootRec_t * mod){
+void elfLoadHeader(Elf32_Ehdr ** hdr, L4_BootRec_t * mod){
     /* Check type of module */
     if (L4_Type (mod) != L4_BootInfo_Module)
         panic ("[RAM-DSM-BIELFLOADER] Wrong module type");
    
 
     /* Load Header from ELF File */
-    hdr = (Elf32_Ehdr*)L4_Module_Start (mod);
+    *hdr = (Elf32_Ehdr*)L4_Module_Start (mod);
     
     return;
 }
@@ -102,7 +102,7 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   
   // load ELF header
   Elf32_Ehdr * hdr = 0;
-  elfLoadHeader(hdr, module);
+  elfLoadHeader(&hdr, module);
 
   L4_Word_t page_start = address & 0xfffff000UL;
   L4_Word_t page_end   = address | 0x00000fffUL;
@@ -156,6 +156,9 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   // Set return page
   idl4_fpage_set_page(return_page, page);
 
+  //hackhackhack: set w and x bit manually
+  return_page->fpage |= 3;
+
   return;
 }
 
@@ -165,7 +168,7 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
 {
   /* implementation of IF_BIELFLOADER::associateImage */
-  printf("Entering associate image...");  
+  printf("Entering associate image...\n");  
 
   // Insert association in association table  
   association_t association;
@@ -177,22 +180,27 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
   // Load Image Header
   L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
 
+  printf("Module description is at 0x%lx\n", module);
+
   Elf32_Ehdr * hdr = 0;
-  elfLoadHeader(hdr, module);
+  elfLoadHeader(&hdr, module);
+
+  printf("Module starts at 0x%lx\n", hdr);
 
   // Set instruction pointer
+  printf("Initial IP as in image: 0x%lx\n", hdr->e_entry);
   * initialIp = hdr->e_entry;
 
   // Send startup IPC
   L4_Msg_t msg;
   L4_Clear(&msg);
-  L4_Append(&msg, (L4_Word_t)hdr->e_entry); // Start IP
+  L4_Append(&msg, 0x204UL);
   L4_Append(&msg, 0);
   L4_Load(&msg);
   L4_Send(*thread);
 
 
-  printf("... leaving associate image!");
+  printf("... leaving associate image!\n");
 
   return;
 }

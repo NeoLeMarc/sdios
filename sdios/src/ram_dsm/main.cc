@@ -35,7 +35,7 @@ int main () {
     }
 
     printf("RAM-DSM ready to start BI ELF loader\n");
-    L4_KDB_Enter();
+    L4_KDB_Enter("nap");
     // Start BI-ELF-Loader
     printf("Start Boot-Image-ELF-Loader...\n");
     bielfloader_server(available);

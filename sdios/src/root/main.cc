@@ -289,6 +289,21 @@ int main(void) {
     L4_ThreadId_t io_dsm_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
     L4_Word_t io_dsm_startip = 0; 
 
+    // First ThreadControl to setup initial thread
+    if (!L4_ThreadControl (io_dsm_id, io_dsm_id, L4_Myself (), L4_nilthread, (void*)-1UL))
+	panic ("ThreadControl failed\n");
+
+    L4_Word_t dummy;
+
+    if (!L4_SpaceControl (io_dsm_id, 0, L4_FpageLog2 (0xB0000000,14), 
+			   utcbarea, L4_anythread, &dummy))
+	panic ("SpaceControl failed\n");
+
+    /* Second ThreadControl, activate thread */
+    if (!L4_ThreadControl (io_dsm_id, io_dsm_id, L4_nilthread, ram_dsm_id, 
+			   (void*)L4_Address (utcbarea)))
+	panic ("ThreadControl failed\n");
+
     CORBA_Environment env (idl4_default_environment);
     IF_BIELFLOADER_associateImage( (CORBA_Object)ram_dsm_id, &io_dsm_id, 2, &io_dsm_startip, &env);
     printf("Root-Task is still alive!");
