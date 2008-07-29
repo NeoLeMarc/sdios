@@ -92,6 +92,7 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 {
   // implementation of IF_PAGEFAULT::pagefault
   printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", (unsigned int)_caller.raw, (unsigned int)address);  
+  L4_KDB_Enter("Pagefault reveiced!");
 
   // determine boot image
   L4_Word_t moduleId = getModuleId((L4_ThreadId_t)_caller);
@@ -120,9 +121,19 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   printf("Page zeroed.\n");
 
   // find and copy relevant ELF sections
-  Elf32_Phdr * phdr = (Elf32_Phdr *)(hdr->e_phoff + hdr);
+  Elf32_Phdr * phdr = (Elf32_Phdr *)(hdr->e_phoff + (unsigned int)hdr);
+
+  // Debug output
+  printf("ELF entry point == 0x%lx, HDR start == 0x%lx, PHDR start == 0x%lx\n", hdr->e_entry, hdr, phdr);
+  printf("PHDR Dump: %lx-%lx-%lx-%lx\n", *phdr, *(phdr + 1), *(phdr + 2), *(phdr + 3));
+  printf("HDR Dump: %lx-%lx-%lx-%lx\n", *hdr, *(hdr + 1), *(hdr + 2), *(hdr + 3));
+
   for(int i = 0; i < hdr->e_phnum; i++){
+      printf("For-loop, i == %i, p_type = %i, PT_LOAD = %i\n", i, phdr[i].p_type, PT_LOAD);  
+
       if(phdr[i].p_type == PT_LOAD){
+
+          printf("Found loadable program section - beginning copy\n");
 
           // Do page and program section overlap?
           if((page_end >= phdr[i].p_vaddr) // Page ends after section start
