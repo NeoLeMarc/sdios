@@ -30,6 +30,8 @@ L4_ThreadId_t sigma0id;
 L4_ThreadId_t locatorid;
 L4_ThreadId_t syscallid;
 
+// not so local, but needed to start other tasks
+L4_ThreadId_t ram_dsm_id;
 
 L4_Word_t pagesize;
 L4_Word_t utcbsize;
@@ -171,6 +173,28 @@ L4_Word_t load_elfimage (L4_BootRec_t* mod) {
     return (hdr->e_entry);
 }
 
+void activate_module (L4_ThreadId_t threadId, L4_Word_t moduleId) {
+    L4_Word_t module_startip = 0; 
+
+    // First ThreadControl to setup initial thread
+    if (!L4_ThreadControl (threadId, threadId, L4_Myself (), L4_nilthread, (void*)-1UL))
+	panic ("ThreadControl failed\n");
+
+    L4_Word_t dummy;
+
+    if (!L4_SpaceControl (threadId, 0, L4_FpageLog2 (0xB0000000,14), 
+			   utcbarea, L4_anythread, &dummy))
+	panic ("SpaceControl failed\n");
+
+    // Second ThreadControl, activate thread //
+    if (!L4_ThreadControl (threadId, threadId, L4_nilthread, ram_dsm_id, 
+			   (void*)L4_Address (utcbarea)))
+	panic ("ThreadControl failed\n");
+
+    CORBA_Environment env (idl4_default_environment);
+    IF_BIELFLOADER_associateImage( (CORBA_Object)ram_dsm_id, &threadId, moduleId, &module_startip, &env);
+}
+
 /* Kills the specified Thread. 
  * Returns: true = success, false = unsuccessful */
 bool kill (L4_ThreadId_t tid) {
@@ -280,55 +304,22 @@ int main(void) {
     L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
     // some ELF loading and starting 
-    L4_ThreadId_t ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
+    ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
     start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
     // Register module of IO Data Space Manager
     L4_ThreadId_t io_dsm_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
-    L4_Word_t io_dsm_startip = 0; 
+    activate_module(io_dsm_id, 2);
+    printf("[ROOT-Task] Registered IO-DSM and is still alive.\n");
 
-    // First ThreadControl to setup initial thread
-    if (!L4_ThreadControl (io_dsm_id, io_dsm_id, L4_Myself (), L4_nilthread, (void*)-1UL))
-	panic ("ThreadControl failed\n");
-
-    L4_Word_t dummy;
-
-    if (!L4_SpaceControl (io_dsm_id, 0, L4_FpageLog2 (0xB0000000,14), 
-			   utcbarea, L4_anythread, &dummy))
-	panic ("SpaceControl failed\n");
-
-    /* Second ThreadControl, activate thread */
-    if (!L4_ThreadControl (io_dsm_id, io_dsm_id, L4_nilthread, ram_dsm_id, 
-			   (void*)L4_Address (utcbarea)))
-	panic ("ThreadControl failed\n");
-
-    CORBA_Environment env (idl4_default_environment);
-    IF_BIELFLOADER_associateImage( (CORBA_Object)ram_dsm_id, &io_dsm_id, 2, &io_dsm_startip, &env);
-    printf("Root-Task is still alive!");
+    // Start Nameserver 
+    L4_ThreadId_t nameserver_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
+    activate_module(nameserver_id, 4);
+    printf("[ROOT-TASK] Registered NAMESERVER and still alive.\n");
 
 /*
-    // IO Data Space Manager
-//    L4_BootRec_t* io_dsm_module = find_module (2, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-
-    // some ELF loading and starting
-//   start_task (io_dsm_id, io_dsm_startip, ram_dsm_pager_id, utcbarea);
-//    printf ("IO-DSM started with as %lx@%lx\n", io_dsm_id.raw, io_dsm_module);
-
-
-
-    // Nameserver 
-    L4_BootRec_t* nameserver_module = find_module(4, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-    L4_Word_t nameserver_startip = load_elfimage(nameserver_module); 
-
-    // some ELF loading and starting 
-    L4_ThreadId_t nameserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
-    start_task (nameserver_id, nameserver_startip, ram_dsm_pager_id, utcbarea);
-    printf ("Nameserver started with as %lx@%lx\n", nameserver_id.raw, nameserver_module);
-
-
-
     // Taskserver 
     L4_BootRec_t* taskserver_module = find_module (5, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
     L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 

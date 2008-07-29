@@ -92,7 +92,6 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 {
   // implementation of IF_PAGEFAULT::pagefault
   printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", (unsigned int)_caller.raw, (unsigned int)address);  
-  L4_KDB_Enter("Pagefault reveiced!");
 
   // determine boot image
   L4_Word_t moduleId = getModuleId((L4_ThreadId_t)_caller);
@@ -110,7 +109,6 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
   // reserve and zero free page
   L4_Fpage_t page = getFreePage();
-  printf("Got free fpage at %lx\n", L4_Address(page));
 
   if (L4_IsNilFpage(page)) {
       panic("[RAM-DSM-BIELFLOADER] Out Of Memory in pagefault handling\n");
@@ -118,22 +116,12 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
   memset((void *)L4_Address(page), 0, L4_Size(page));
 
-  printf("Page zeroed.\n");
-
   // find and copy relevant ELF sections
   Elf32_Phdr * phdr = (Elf32_Phdr *)(hdr->e_phoff + (unsigned int)hdr);
 
-  // Debug output
-  printf("ELF entry point == 0x%lx, HDR start == 0x%lx, PHDR start == 0x%lx\n", hdr->e_entry, hdr, phdr);
-  printf("PHDR Dump: %lx-%lx-%lx-%lx\n", *phdr, *(phdr + 1), *(phdr + 2), *(phdr + 3));
-  printf("HDR Dump: %lx-%lx-%lx-%lx\n", *hdr, *(hdr + 1), *(hdr + 2), *(hdr + 3));
-
   for(int i = 0; i < hdr->e_phnum; i++){
-      printf("For-loop, i == %i, p_type = %i, PT_LOAD = %i\n", i, phdr[i].p_type, PT_LOAD);  
 
       if(phdr[i].p_type == PT_LOAD){
-
-          printf("Found loadable program section - beginning copy\n");
 
           // Do page and program section overlap?
           if((page_end >= phdr[i].p_vaddr) // Page ends after section start
@@ -173,7 +161,6 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
   idl4_fpage_set_base(return_page, page_end);
   idl4_fpage_set_permissions(return_page, IDL4_PERM_FULL);
 
-  printf("About to return.\n");
   return;
 }
 
@@ -183,7 +170,7 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
 {
   /* implementation of IF_BIELFLOADER::associateImage */
-  printf("Entering associate image...\n");  
+  printf("[RAM-DSM-BIELFLOADER] Entering associate image...\n");  
 
   // Insert association in association table  
   association_t association;
@@ -192,14 +179,20 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
   appendToAssociationTable(association);
 
+  printf("[RAM-DSM-BIELFLOADER] Association saved.\n");
+
   // Load Image Header
   L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
+
+  printf("[RAM-DSM-BIELFLOADER] Module found.");
 
   Elf32_Ehdr * hdr = 0;
   elfLoadHeader(&hdr, module);
 
   // Set instruction pointer
   * initialIp = hdr->e_entry;
+
+  printf(" Initial IP is %lx. About to send startup IPC...\n", hdr->e_entry);
 
   // Send startup IPC
   L4_Msg_t msg;
@@ -210,7 +203,7 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
   L4_Send(*thread);
 
 
-  printf("... leaving associate image!\n");
+  printf("[RAM-DSM-BIELFLOADER] leaving associate image.\n");
 
   return;
 }
