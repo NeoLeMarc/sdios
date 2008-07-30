@@ -47,6 +47,7 @@ extern char __heap_start;
 extern char __heap_end;
 
 
+L4_Word_t next_thread_no;
 L4_Word_t syscall_stack[1024];
 L4_Word_t locator_stack[1024];
 L4_Word_t ram_dsm_pager_stack[1024];
@@ -195,6 +196,10 @@ void activate_module (L4_ThreadId_t threadId, L4_Word_t moduleId) {
     IF_BIELFLOADER_associateImage( (CORBA_Object)ram_dsm_id, &threadId, moduleId, &module_startip, &env);
 }
 
+inline L4_ThreadId_t get_free_threadid() {
+    return L4_GlobalId(next_thread_no++, 1);
+}
+
 /* Kills the specified Thread. 
  * Returns: true = success, false = unsuccessful */
 bool kill (L4_ThreadId_t tid) {
@@ -215,6 +220,7 @@ int main(void) {
     L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
 
     sigma0id  = L4_Pager ();
+    next_thread_no = L4_ThreadNo(L4_Myself()) + 1;
     locatorid = L4_nilthread;
     syscallid = L4_nilthread;
 
@@ -251,7 +257,7 @@ int main(void) {
     /* startup our locator */
     printf ("Starting locator ...\n");
     /* Generate some threadid */
-    locatorid = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 1, 1);
+    locatorid = get_free_threadid();
     start_thread (locatorid, 
 		  (L4_Word_t)&locator_server, 
 		  (L4_Word_t)&locator_stack[1023],
@@ -261,7 +267,7 @@ int main(void) {
 
     /* startup our syscall server */
     printf("Starting syscall server ... \n");
-    syscallid = L4_GlobalId(L4_ThreadNo(L4_Myself()) + 2, 1);
+    syscallid = get_free_threadid();
     start_thread (syscallid,
             (L4_Word_t)&syscall_server,
             (L4_Word_t)&syscall_stack[1023],
@@ -291,7 +297,7 @@ int main(void) {
     *****************************************************************/   
 
     // Start Pager-Thread for the RAM-DSM 
-    L4_ThreadId_t ram_dsm_pager_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 3, 1);
+    L4_ThreadId_t ram_dsm_pager_id = get_free_threadid();
     printf("Starting RAM-DSM Pager with TID: %lx\n", ram_dsm_pager_id.raw);
     start_thread (ram_dsm_pager_id,
             (L4_Word_t)&pager_loop,
@@ -304,18 +310,18 @@ int main(void) {
     L4_Word_t ram_dsm_startip = load_elfimage(ram_dsm_module); 
 
     // some ELF loading and starting 
-    ram_dsm_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 5, 1);
+    ram_dsm_id = get_free_threadid();
     start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
 
     // Register module of IO Data Space Manager
-    L4_ThreadId_t io_dsm_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 4, 1);
+    L4_ThreadId_t io_dsm_id  = get_free_threadid();
     activate_module(io_dsm_id, 2);
     printf("[ROOT-Task] Registered IO-DSM and is still alive.\n");
 
     // Start Nameserver 
-    L4_ThreadId_t nameserver_id  = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 6, 1);
+    L4_ThreadId_t nameserver_id  = get_free_threadid();
     activate_module(nameserver_id, 4);
     printf("[ROOT-TASK] Registered NAMESERVER and still alive.\n");
 
@@ -325,7 +331,7 @@ int main(void) {
     L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
 
     // some ELF loading and starting
-    L4_ThreadId_t taskserver_id = L4_GlobalId ( L4_ThreadNo (L4_Myself ()) + 7, 1);
+    L4_ThreadId_t taskserver_id = get_free_threadid();
     start_task (taskserver_id, taskserver_startip, ram_dsm_pager_id, utcbarea);
     printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
     // Taskserver needs high Priority because you can set Prios only to values smaller or equal your own
