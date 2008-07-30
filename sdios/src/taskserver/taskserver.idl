@@ -1,0 +1,6 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <iftask.idl>
+
+interface taskserver : IF_TASK {
+};

@@ -368,3 +368,4 @@ int main(void) {
 
     panic ("Unexpected return from PagerLoop()");
 }
+// vim:sw=2:ts=2:expandtab: 

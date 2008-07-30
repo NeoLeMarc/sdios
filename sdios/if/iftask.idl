@@ -1,0 +1,34 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_TASK_ID)]
+
+interface IF_TASK{
+  exception noPrivilege{};
+  exception invalidThread{};
+  exception outOfMemory{};
+  /*
+  exception invalidSpace{};
+  exception invalidScheduler{};
+  exception invalidUtcbLocation{};
+  exception invalidKipArea{};
+
+  void ThreadControl(in L4_ThreadId_t dest, in L4_ThreadId_t SpaceSpecifier, in L4_ThreadId_t scheduler, in L4_ThreadId_t pager, in L4_Word_t UtcbLocation)
+      raises(noPrivilege, invalidThread, invalidSpace, invalidScheduler, invalidUtcbLocation, outOfMemory);
+
+
+  void SpaceControl(in L4_ThreadId_t SpaceSpecifier, in L4_Word_t control, in L4_Fpage_t KernelInterfacePageArea, in L4_Fpage_t UtcbArea, in L4_ThreadId_t Redirector, out L4_Word_t old_Control)
+          raises(noPrivilege, invalidSpace, invalidUtcbLocation, invalidKipArea);
+  */
+
+  L4_ThreadId_t startTask(in string<256> path, in string<4096> args, in string<2048> env) 
+    raises(outOfMemory);
+  void kill(in L4_ThreadId_t thread)
+    raises(noPrivilege, invalidThread);
+  L4_Word_t waitTid(in L4_ThreadId_t thread)
+    raises(invalidThread);  
+  L4_ThreadId_t createThread()
+    raises(outOfMemory);
+  L4_Word_t getThreadStatus(in L4_ThreadId_t thread)
+    raises(invalidThread);
+};
+// vim:sw=2:ts=2:expandtab:

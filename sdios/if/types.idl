@@ -25,6 +25,7 @@ const interfaceid_t IF_LOCATOR_ID     = 2;
 const interfaceid_t IF_SYSCALL_ID     = 3;
 const interfaceid_t IF_PAGEFAULT_ID   = 4;
 const interfaceid_t IF_BIELFLOADER_ID = 5;
+const interfaceid_t IF_TASK_ID        = 6;
 
 
 const interfaceid_t MAX_INTERFACEID = 8;
