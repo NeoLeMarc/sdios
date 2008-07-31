@@ -13,19 +13,30 @@
 
 #include <idl4glue.h>
 #include <if/iflocator.h>
+#include <if/ifbielfloader.h>
 #include <if/iflogging.h>
 
+#include "taskserver.h"
+
 L4_ThreadId_t locatorid; 
+L4_ThreadId_t ram_dsm_id; 
+L4_ThreadId_t syscallid;
 
 int main () {
-    printf ("Taskserver is alive\n");
-    
-    /* Spin forever */
-    L4_Time_t t = L4_TimePeriod (1000000);
-    while (42) {
-        L4_Sleep(t);
-	L4_Yield();
-    }
-    
+    printf ("[TS] Taskserver is alive\n");
+   
+    CORBA_Environment env (idl4_default_environment);
+
+    // Set RAM-DSM-ID
+    ram_dsm_id = L4_Pager(); 
+    printf("[TS] Got pager id 0x%08lx\n", ram_dsm_id);
+    locatorid = IF_BIELFLOADER_getLocator((CORBA_Object) ram_dsm_id, &env); 
+    printf("[TS] Got locator id 0x%08lx\n", locatorid);
+    IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_SYSCALL_ID, &syscallid, &env);
+    printf("[TS] Located syscall server at 0x%08lx\n", syscallid);
+
+    // Start Server Loop
+    taskserver_server();
+
     return 0;
 }

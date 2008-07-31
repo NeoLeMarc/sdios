@@ -23,6 +23,7 @@
 
 #include <idl4glue.h>
 
+#include <if/iflocator.h>
 #include <if/ifbielfloader.h>
 
 /* local threadids */
@@ -288,6 +289,9 @@ int main(void) {
     list_modules ((L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
 
 
+    // register syscall server
+    CORBA_Environment env (idl4_default_environment);
+    IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_SYSCALL_ID, &syscallid, &env);
 
 
     /****************************************************************
@@ -314,16 +318,19 @@ int main(void) {
     start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
     printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
+    IF_BIELFLOADER_registerLocator((CORBA_Object) ram_dsm_id, &locatorid, &env);
+    printf ("[RT] Locator registered with RAM-DSM\n");
+
 
     // Register module of IO Data Space Manager
     L4_ThreadId_t io_dsm_id  = get_free_threadid();
     activate_module(io_dsm_id, 2);
-    printf("[ROOT-Task] Registered IO-DSM and is still alive.\n");
+    printf("[RT] Registered IO-DSM and is still alive.\n");
 
     // Start Nameserver 
     L4_ThreadId_t nameserver_id  = get_free_threadid();
     activate_module(nameserver_id, 4);
-    printf("[ROOT-TASK] Registered NAMESERVER and still alive.\n");
+    printf("[RT] Registered NAMESERVER and still alive.\n");
 
 /*
     // Taskserver 

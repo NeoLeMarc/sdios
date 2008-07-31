@@ -15,6 +15,8 @@
 
 #include "bielfloader-server.h"
 
+// Locator id
+L4_ThreadId_t locator_id = { raw: 0 };
 
 // Data structure to store associations
 #define ASSOC_TABLE_SIZE 64
@@ -209,6 +211,31 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 }
 
 IDL4_PUBLISH_BIELFLOADER_ASSOCIATEIMAGE(bielfloader_associateImage_implementation);
+
+IDL4_INLINE void bielfloader_registerLocator_implementation(CORBA_Object _caller, const L4_ThreadId_t *locatorId, idl4_server_environment *_env)
+
+{
+  /* implementation of IF_BIELFLOADER::registerLocator */
+
+  // Write once, read many.
+  if (L4_IsNilThread(locator_id))
+    locator_id = *locatorId; 
+
+  return;
+}
+
+IDL4_PUBLISH_BIELFLOADER_REGISTERLOCATOR(bielfloader_registerLocator_implementation);
+
+IDL4_INLINE L4_ThreadId_t bielfloader_getLocator_implementation(CORBA_Object _caller, idl4_server_environment *_env)
+
+{
+
+  /* implementation of IF_BIELFLOADER::getLocator */
+  return locator_id;
+}
+
+IDL4_PUBLISH_BIELFLOADER_GETLOCATOR(bielfloader_getLocator_implementation);
+
 
 void *bielfloader_vtable_5[BIELFLOADER_DEFAULT_VTABLE_SIZE] = BIELFLOADER_DEFAULT_VTABLE_5;
 void *bielfloader_vtable_discard[BIELFLOADER_DEFAULT_VTABLE_SIZE] = BIELFLOADER_DEFAULT_VTABLE_DISCARD;

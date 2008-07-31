@@ -5,9 +5,16 @@ import "sdi/types.h";
 interface IF_BIELFLOADER{
     exception invalidBootModuleId{};
     exception outOfMemory{};
+    exception noPrivilege{};
 
     // Boot Info ELF Loader    
     void associateImage(in L4_ThreadId_t thread, in L4_Word_t bootModuleId, out L4_Word_t initialIp)
         raises(invalidBootModuleId, outOfMemory); 
 
+    // Register locator, needed for bootstrapping
+    void registerLocator(in L4_ThreadId_t locatorId)
+        raises(noPrivilege);
+
+    // Get locator
+    L4_ThreadId_t getLocator();
 };
