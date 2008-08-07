@@ -25,6 +25,7 @@
 
 #include <if/iflocator.h>
 #include <if/ifbielfloader.h>
+#include <if/iftask.h>
 
 /* local threadids */
 L4_ThreadId_t sigma0id;
@@ -33,6 +34,7 @@ L4_ThreadId_t syscallid;
 
 // not so local, but needed to start other tasks
 L4_ThreadId_t ram_dsm_id;
+L4_ThreadId_t taskserver_id;
 
 L4_Word_t pagesize;
 L4_Word_t utcbsize;
@@ -326,30 +328,26 @@ int main(void) {
     IF_BIELFLOADER_registerLocator((CORBA_Object) ram_dsm_id, &locatorid, &env);
     printf ("[RT] Locator registered with RAM-DSM\n");
 
-
-    // Register module of IO Data Space Manager
-    L4_ThreadId_t io_dsm_id  = get_free_threadid();
-    activate_module(io_dsm_id, 2);
-    printf("[RT] Registered IO-DSM and is still alive.\n");
-
-    // Start Nameserver 
-    L4_ThreadId_t nameserver_id  = get_free_threadid();
-    activate_module(nameserver_id, 4);
-    printf("[RT] Registered NAMESERVER and still alive.\n");
-
-/*
     // Taskserver 
-    L4_BootRec_t* taskserver_module = find_module (5, (L4_BootInfo_t*)L4_BootInfo (L4_KernelInterface ()));
-    L4_Word_t taskserver_startip = load_elfimage(taskserver_module); 
+    taskserver_id = get_free_threadid();
+    activate_module(taskserver_id, 5);
+    printf ("[RT] Registered Taskserver\n");
 
-    // some ELF loading and starting
-    L4_ThreadId_t taskserver_id = get_free_threadid();
-    start_task (taskserver_id, taskserver_startip, ram_dsm_pager_id, utcbarea);
-    printf ("Taskserver started with as %lx@%lx\n", taskserver_id.raw, taskserver_module);
-    // Taskserver needs high Priority because you can set Prios only to values smaller or equal your own
-    L4_Set_Priority((L4_ThreadId_t) taskserver_id, (L4_Word_t) 255);
-    printf("Taskserver Priority set to 255\n"); 
-    */
+    // Use Taskserver to start IO-DSM
+    CORBA_char taskserverPath[256], args[3], penv[3];
+  
+    *(L4_Word_t *)taskserverPath = 2; // Module 2 == IO-DSM
+    IF_TASK_startTask((CORBA_Object) taskserver_id, taskserverPath, args, penv, &env);
+    printf("[RT] Told Taskserver to start IO-DSM\n");
+
+    // Use Taskserver to start Nameserver
+    CORBA_char nameserverPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+
+    *(L4_Word_t *)nameserverPath = 4; // Module 4 == Nameserver 
+    IF_TASK_startTask((CORBA_Object) taskserver_id, nameserverPath, args, penv, &env);
+    printf("[RT] Told Taskserver to start Nameserver\n");
+
 
     /****************************************************************
      

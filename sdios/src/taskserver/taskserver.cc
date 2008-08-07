@@ -7,6 +7,7 @@
  * Report bugs to haeberlen@ira.uka.de
  *****************************************************************/
 
+#include <l4io.h>
 #include <idl4glue.h>
 #include <if/ifsyscall.h>
 #include <if/ifbielfloader.h>
@@ -60,7 +61,7 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
   // 4. Ask BIELFLOADER to associate image
   L4_Word_t moduleId = *path;
   IF_BIELFLOADER_associateImage((CORBA_Object)ram_dsm_id, &threadId, moduleId, &dummy, &env);
-  
+ 
   return threadId;
 }
 
