@@ -201,6 +201,22 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
 IDL4_PUBLISH_BIELFLOADER_ASSOCIATEIMAGE(bielfloader_associateImage_implementation);
 
+
+IDL4_INLINE void bielfloader_copyAssociation_implementation(CORBA_Object _caller, const L4_ThreadId_t *fromThread, const L4_ThreadId_t *toThread, idl4_server_environment *_env)
+
+{
+  // Copies the ELF-Image association from one task to another  
+  association_t association;
+  association.module = getModuleId(*fromThread);
+  association.thread = *toThread;
+  appendToAssociationTable(association);
+  
+  return;
+}
+
+IDL4_PUBLISH_BIELFLOADER_COPYASSOCIATION(bielfloader_copyAssociation_implementation);
+
+
 IDL4_INLINE void bielfloader_registerLocator_implementation(CORBA_Object _caller, const L4_ThreadId_t *locatorId, idl4_server_environment *_env)
 
 {
@@ -224,6 +240,8 @@ IDL4_INLINE L4_ThreadId_t bielfloader_getLocator_implementation(CORBA_Object _ca
 }
 
 IDL4_PUBLISH_BIELFLOADER_GETLOCATOR(bielfloader_getLocator_implementation);
+
+
 
 
 void *bielfloader_vtable_5[BIELFLOADER_DEFAULT_VTABLE_SIZE] = BIELFLOADER_DEFAULT_VTABLE_5;

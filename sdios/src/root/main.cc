@@ -249,6 +249,7 @@ int main(void) {
     utcbarea = L4_FpageLog2 ((L4_Word_t) L4_MyLocalId ().raw,
 			      L4_UtcbAreaSizeLog2 (kip) + 1);
 
+    printf("UTCB size: %ld; UTCB area base address: 0x%08lx, size %ld byte\n", utcbsize, L4_Address(utcbarea), L4_Size(utcbarea));
 
 
     /****************************************************************

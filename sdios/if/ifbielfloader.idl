@@ -11,6 +11,10 @@ interface IF_BIELFLOADER{
     void associateImage(in L4_ThreadId_t thread, in L4_Word_t bootModuleId, out L4_Word_t initialIp)
         raises(invalidBootModuleId, outOfMemory); 
 
+    // Copy association
+    void copyAssociation(in L4_ThreadId_t fromThread, in L4_ThreadId_t toThread)
+        raises(outOfMemory); 
+
     // Register locator, needed for bootstrapping
     void registerLocator(in L4_ThreadId_t locatorId)
         raises(noPrivilege);

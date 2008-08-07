@@ -12,6 +12,7 @@
 #include <if/ifsyscall.h>
 #include <if/ifbielfloader.h>
 #include "taskserver-server.h"
+#include "taskserver.h"
 
 // RAM-DSM-ID
 extern L4_ThreadId_t ram_dsm_id;
@@ -20,6 +21,77 @@ extern L4_ThreadId_t syscallid;
 
 // Thread ID Management
 L4_Word_t next_thread_no = L4_ThreadNo(L4_Myself()) + 1; 
+
+// Super-duper high-sophisticated thread management
+#define MAX_NUM_SPACES 64
+as_t spaces[MAX_NUM_SPACES];
+#define MAX_NUM_THREADS 256
+thread_t threads[MAX_NUM_THREADS];
+L4_Word_t next_thread_idx = 0, next_as_idx;
+
+as_t * get_free_ascb() {
+  for (L4_Word_t i = next_as_idx; i != next_as_idx - 1; i = (i + 1) % MAX_NUM_SPACES) {
+    if (spaces[i].firstThread == NULL) {
+      return &spaces[i];
+    }
+  }
+  panic("[TS] No more ASCBs");
+}
+
+thread_t * get_free_tcb() {
+  for (L4_Word_t i = next_thread_idx; i != next_thread_idx - 1; i = (i + 1) % MAX_NUM_THREADS) {
+    if (threads[i].nextThread == NULL) {
+      return &threads[i];
+    }
+  }
+  panic("[TS] No more TCBs");
+}
+
+L4_ThreadId_t get_free_localid(as_t * space) {
+  L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
+  L4_Word_t utcbsize = L4_UtcbSize(kip);
+  L4_Word_t utcbareasize = L4_Size(space->utcbarea);
+  L4_Word_t utcbareastart = L4_Address(space->utcbarea);
+  L4_Word_t utcbareaend = utcbareasize + utcbareastart;
+  L4_ThreadId_t retval = L4_nilthread;
+  for (L4_Word_t localid = utcbareastart; localid < utcbareaend; localid += utcbsize) {
+    thread_t * cur = space->firstThread;
+    while (cur != NULL) {
+      if (cur->localid.raw == localid)
+        break;
+      cur = cur->nextThread;
+    }
+    if (cur == NULL) {
+      retval.raw = localid;
+      return retval;
+    }
+  }
+  return retval;
+}
+
+thread_t * find_tcb(L4_ThreadId_t threadid) {
+  for (int i = 0; i < MAX_NUM_THREADS; i++) {
+    if (threads[i].globalid == threadid) {
+      return &threads[i];
+    }
+  }
+  return NULL;
+}
+
+void delete_tcb(thread_t * thread) {
+  as_t * space = thread->as;
+  if (space->firstThread == thread) {
+    space->firstThread = thread->nextThread;
+    // if thread->nextThread == NULL, space gets therefore marked free
+  } else {
+    thread_t * cur = space->firstThread;
+    while (cur->nextThread != thread) {
+      cur = cur ->nextThread;
+    }
+    cur->nextThread = thread->nextThread;
+  }
+  thread->nextThread = NULL;
+}
 
 inline L4_ThreadId_t get_free_threadid() {
     return L4_GlobalId(next_thread_no++, 1);
@@ -31,8 +103,14 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
 
 {
 
+  thread_t * thread = get_free_tcb();
+  as_t * space = get_free_ascb();
+  space->firstThread = thread;
+  thread->as = space;
+
   // Get a new Thread ID
   L4_ThreadId_t threadId = get_free_threadid();
+  thread->globalid = threadId;
   L4_ThreadId_t nilthread = L4_nilthread;
   L4_ThreadId_t anythread = L4_anythread;
   L4_ThreadId_t myself = L4_Myself();
@@ -46,6 +124,8 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
 
   L4_KernelInterfacePage_t* kip = (L4_KernelInterfacePage_t*)L4_KernelInterface ();
   L4_Fpage_t utcbarea = L4_FpageLog2 ((L4_Word_t) L4_MyLocalId ().raw, L4_UtcbAreaSizeLog2 (kip) + 1);
+  space->utcbarea = utcbarea;
+  thread->localid.raw = L4_Address(utcbarea);
 
   // 1. Ask syscall server to do ThreadControl to setup initial thread
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &myself, &nilthread, -1UL, &env);
@@ -55,7 +135,7 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
   IF_SYSCALL_SpaceControl((CORBA_Object)syscallid, &threadId, 0, &kiparea, &utcbarea, &anythread, &dummy, &env);
   
   // 3. Ask syscall server to do second ThreadControl to activate thread
-  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &nilthread, &ram_dsm_id, L4_Address (utcbarea), &env);
+  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &nilthread, &ram_dsm_id, thread->localid.raw, &env);
   
 
   // 4. Ask BIELFLOADER to associate image
@@ -74,10 +154,16 @@ IDL4_INLINE void taskserver_kill_implementation(CORBA_Object _caller, const L4_T
   // Setup corba environment
   CORBA_Environment env (idl4_default_environment);
 
+  // Find corresponding TCB
+  thread_t * tcb = find_tcb(*thread);
+  if (tcb == NULL) 
+    panic("[TS] Attempt to kill an unknown thread");
+
   // Ask syscall server to do terminate thread 
   L4_ThreadId_t nilthread = L4_nilthread;
-  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, thread, &nilthread, &nilthread, &nilthread, -1, &env);
+  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, thread, &nilthread, &nilthread, &nilthread, -1UL, &env);
   
+  delete_tcb(tcb);
   
   return;
 }
@@ -99,11 +185,27 @@ IDL4_PUBLISH_TASKSERVER_WAITTID(taskserver_waitTid_implementation);
 IDL4_INLINE L4_ThreadId_t taskserver_createThread_implementation(CORBA_Object _caller, idl4_server_environment *_env)
 
 {
-  L4_ThreadId_t __retval = { raw: 0 };
+
+  // Find address space
+  thread_t * caller = find_tcb((L4_ThreadId_t)_caller);
+  as_t * space = caller->as;
+    
+  // Setup corba environment
+  CORBA_Environment env (idl4_default_environment);
+
+  // Acquire a free global thread ID
+  L4_ThreadId_t newthreadid = get_free_threadid();
+  thread_t * newthread = get_free_tcb();
+  newthread->nextThread = caller->nextThread;
+  caller->nextThread = newthread;
+  newthread->globalid = newthreadid;
+  L4_ThreadId_t myself = L4_Myself();
 
   /* implementation of IF_TASK::createThread */
+
+  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &newthreadid, (L4_ThreadId_t*)&_caller, &myself, &ram_dsm_id, -1UL, &env);
   
-  return __retval;
+  return newthreadid;
 }
 
 IDL4_PUBLISH_TASKSERVER_CREATETHREAD(taskserver_createThread_implementation);
@@ -161,3 +263,4 @@ void taskserver_discard(void)
 {
 }
 
+// vim:sw=2:ts=2:expandtab: 
