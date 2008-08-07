@@ -282,6 +282,11 @@ int main(void) {
 	    panic ("Was not able to get bootinfo");
     }
 
+    // Bring in some other pages needed later by other threads in our AS, 
+    // wrapped in printf in order to not get optimized away
+    // Do not remove - or do you want OpenSSL disaster, part 2?
+    printf("", *((L4_Word_t *)0x00304018UL), *((L4_Word_t *)0x00305018UL));
+
     /* Quick check */
     if (!L4_BootInfo_Valid ((void*)L4_BootInfo (L4_KernelInterface ()))) 
 	    panic ("Bootinfo not found");
