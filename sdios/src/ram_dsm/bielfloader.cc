@@ -93,7 +93,6 @@ IDL4_INLINE void bielfloader_pagefault_implementation(CORBA_Object _caller, cons
 
 {
   // implementation of IF_PAGEFAULT::pagefault
-  printf("[RAM-DSM-BIELFLOADER] Received pagefault from 0x%x at 0x%x\n", (unsigned int)_caller.raw, (unsigned int)address);  
 
   // determine boot image
   L4_Word_t moduleId = getModuleId((L4_ThreadId_t)_caller);
@@ -172,7 +171,6 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
 {
   /* implementation of IF_BIELFLOADER::associateImage */
-  printf("[RAM-DSM-BIELFLOADER] Entering associate image...\n");  
 
   // Insert association in association table  
   association_t association;
@@ -181,20 +179,14 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
   appendToAssociationTable(association);
 
-  printf("[RAM-DSM-BIELFLOADER] Association saved.\n");
-
   // Load Image Header
   L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
-
-  printf("[RAM-DSM-BIELFLOADER] Module found.");
 
   Elf32_Ehdr * hdr = 0;
   elfLoadHeader(&hdr, module);
 
   // Set instruction pointer
   * initialIp = hdr->e_entry;
-
-  printf(" Initial IP is %lx. About to send startup IPC...\n", hdr->e_entry);
 
   // Send startup IPC
   L4_Msg_t msg;
@@ -203,9 +195,6 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
   L4_Append(&msg, 0);
   L4_Load(&msg);
   L4_Send(*thread);
-
-
-  printf("[RAM-DSM-BIELFLOADER] leaving associate image.\n");
 
   return;
 }

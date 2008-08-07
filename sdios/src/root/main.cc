@@ -256,7 +256,7 @@ int main(void) {
     *****************************************************************/   
 
     /* startup our locator */
-    printf ("Starting locator ...\n");
+    printf ("[RT] Starting locator ... ");
     /* Generate some threadid */
     locatorid = get_free_threadid();
     start_thread (locatorid, 
@@ -267,7 +267,7 @@ int main(void) {
     printf ("Started with id %lx\n", locatorid.raw);
 
     /* startup our syscall server */
-    printf("Starting syscall server ... \n");
+    printf("[RT] Starting syscall server ... ");
     syscallid = get_free_threadid();
     start_thread (syscallid,
             (L4_Word_t)&syscall_server,
@@ -307,7 +307,7 @@ int main(void) {
 
     // Start Pager-Thread for the RAM-DSM 
     L4_ThreadId_t ram_dsm_pager_id = get_free_threadid();
-    printf("Starting RAM-DSM Pager with TID: %lx\n", ram_dsm_pager_id.raw);
+    printf("[RT] Starting RAM-DSM Pager with TID: %lx\n", ram_dsm_pager_id.raw);
     start_thread (ram_dsm_pager_id,
             (L4_Word_t)&pager_loop,
             (L4_Word_t)&ram_dsm_pager_stack[1023],
@@ -321,7 +321,7 @@ int main(void) {
     // some ELF loading and starting 
     ram_dsm_id = get_free_threadid();
     start_task (ram_dsm_id, ram_dsm_startip, ram_dsm_pager_id, utcbarea);
-    printf ("RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
+    printf ("[RT] RAM-DSM started with as %lx@%lx\n", ram_dsm_id.raw, ram_dsm_module);
 
     IF_BIELFLOADER_registerLocator((CORBA_Object) ram_dsm_id, &locatorid, &env);
     printf ("[RT] Locator registered with RAM-DSM\n");
@@ -362,12 +362,9 @@ int main(void) {
     /* There is nothing left to page :( 
      * Unfortunately its not possible to kill the rootthread so we have to idle.
      * WARNING: busy waiting with threads that have different priorities is evil! (starvation) */
-    L4_Set_Priority(L4_Myself(), (L4_Word_t) 100);
     L4_Time_t t = L4_TimePeriod (1000000);
-    printf("roottask Priority set to 100\n"); 
     while (42) {
         L4_Sleep (t);
-        L4_Yield ();
     }
 
     

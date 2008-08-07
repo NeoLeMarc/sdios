@@ -24,7 +24,7 @@ L4_ThreadId_t locatorid;
 L4_Word_t available[AVAILABLE_BITMAP_SIZE];
 
 int main () {
-    printf ("RAM Dataspace Manager is alive\n");
+    printf ("[RAM-DSM] is alive\n");
 
     // Try to get whole memory from sigma0
     for (L4_Word_t i = 0x00100000UL; i < 0x02000000UL; i += 0x1000UL) {
@@ -35,9 +35,8 @@ int main () {
     }
 
     // Start BI-ELF-Loader
-    printf("Start Boot-Image-ELF-Loader...\n");
     bielfloader_server(available);
-    printf("Oooooooops, your ELF-Loader just died!\n");
+    printf("[RAM-DSM] Oooooooops, your ELF-Loader just died!\n");
 
 
     /* Start Pager */

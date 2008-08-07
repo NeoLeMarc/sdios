@@ -26,16 +26,11 @@ void pager_loop (void)
    
     for (;;)
     {
-	printf("RAM-DSM-Pager is waiting for incoming message\n");
 	tag = L4_Wait (&tid);
 
 	for (;;)
 	{
 	    L4_Store (tag, &msg);
-
-	    printf ("RAM-DSM-Pager (tid:%lx): got msg from %p (%p, %p, %p)\n", L4_Myself().raw,
-		    (void *) tid.raw, (void *) tag.raw,
-		    (void *) L4_Get (&msg, 0), (void *) L4_Get (&msg, 1));
 
 	    if (L4_UntypedWords (tag) != 2 || L4_TypedWords (tag) != 0 ||
 		!L4_IpcSucceeded (tag))
@@ -60,7 +55,6 @@ void pager_loop (void)
 	    L4_Append (&msg, L4_MapItem (L4_FpageLog2 (faddr, page_bits) +
 					 L4_FullyAccessible, faddr));
 	    L4_Load (&msg);
-	    //printf("RAM-DSM-Pager (tid:%lx): Blocking ReplyWait to %lx\n", L4_Myself().raw, tid.raw);
 	    tag = L4_ReplyWait (tid, &tid);
 	}
     }
