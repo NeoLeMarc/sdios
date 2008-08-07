@@ -337,8 +337,8 @@ int main(void) {
     CORBA_char taskserverPath[256], args[3], penv[3];
   
     *(L4_Word_t *)taskserverPath = 2; // Module 2 == IO-DSM
-    IF_TASK_startTask((CORBA_Object) taskserver_id, taskserverPath, args, penv, &env);
-    printf("[RT] Told Taskserver to start IO-DSM\n");
+    L4_ThreadId_t io_dsm_id = IF_TASK_startTask((CORBA_Object) taskserver_id, taskserverPath, args, penv, &env);
+    printf("[RT] Taskserver started IO-DSM as %08lx\n", io_dsm_id);
 
     // Use Taskserver to start Nameserver
     CORBA_char nameserverPath[256]; // We would really like to reuse the above string,
@@ -347,6 +347,10 @@ int main(void) {
     *(L4_Word_t *)nameserverPath = 4; // Module 4 == Nameserver 
     IF_TASK_startTask((CORBA_Object) taskserver_id, nameserverPath, args, penv, &env);
     printf("[RT] Told Taskserver to start Nameserver\n");
+
+    // Ask Taskserver to kill IO-DSM
+    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);
+    printf("[RT] Told Taskserver to kill IO-DSM\n");
 
 
     /****************************************************************

@@ -70,7 +70,14 @@ IDL4_PUBLISH_TASKSERVER_STARTTASK(taskserver_startTask_implementation);
 IDL4_INLINE void taskserver_kill_implementation(CORBA_Object _caller, const L4_ThreadId_t *thread, idl4_server_environment *_env)
 
 {
-  /* implementation of IF_TASK::kill */
+
+  // Setup corba environment
+  CORBA_Environment env (idl4_default_environment);
+
+  // Ask syscall server to do terminate thread 
+  L4_ThreadId_t nilthread = L4_nilthread;
+  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, thread, &nilthread, &nilthread, &nilthread, -1, &env);
+  
   
   return;
 }
