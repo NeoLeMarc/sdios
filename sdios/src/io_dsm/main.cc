@@ -136,6 +136,11 @@ int main () {
     // Start thread 
     L4_Start(thread_id, (L4_Word_t)&test_stack[1024], (L4_Word_t)&testThread);
 
+    // Wait for thread to terminate
+    printf("Waiting for new thread to terminate...");
+    L4_Word_t status = IF_TASK_waitTid((CORBA_Object) taskserver_id, &thread_id, &env);
+    printf("... done!%lx\n", status);
+
     /* Spin forever */
     while (42);
     
