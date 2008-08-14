@@ -35,6 +35,10 @@ int main () {
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_SYSCALL_ID, &syscallid, &env);
     printf("[TS] Located syscall server at 0x%08lx\n", syscallid);
 
+    // Register Taskserver with Locator
+    L4_ThreadId_t taskserverId = L4_Myself();
+    IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_TASK_ID, &taskserverId, &env);     
+
     // Start Server Loop
     taskserver_server();
 

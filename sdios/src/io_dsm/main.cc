@@ -14,11 +14,24 @@
 #include <idl4glue.h>
 #include <if/iflocator.h>
 #include <if/iflogging.h>
-
+#include <if/iftask.h>
+#include <if/ifbielfloader.h>                                                                             
 
 #include "../lib/io/ia32-port.h"
 
 L4_ThreadId_t locatorid; 
+L4_ThreadId_t taskserver_id;
+L4_Word_t     test_stack[1024];
+
+void testThread(){
+    CORBA_Environment env (idl4_default_environment);
+    printf("Test Thread up & running!\n");
+    L4_ThreadId_t myId = L4_Myself();
+    IF_TASK_kill((CORBA_Object) taskserver_id, &myId, &env);
+    printf("I'm undead!");
+
+    while(42);
+}
 
 void RequestPage(int base, int size){
     /* Try to get all memory from sigma0 */
@@ -107,7 +120,22 @@ int main () {
         printf("No PCI Bus found!\n");
     }
     */
-   
+
+    // FIXME: Remove
+    CORBA_Environment env (idl4_default_environment);
+    L4_ThreadId_t ram_dsm_id;                                    
+
+    // Get locator id & Locate Taskserver
+    ram_dsm_id = L4_Pager();       
+    locatorid  = IF_BIELFLOADER_getLocator((CORBA_Object) ram_dsm_id, &env);
+    IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_TASK_ID, &taskserver_id, &env);
+
+    // Use Taskserver to create a new thred - for testing purposes only
+    L4_ThreadId_t thread_id = IF_TASK_createThread((CORBA_Object) taskserver_id, &env);
+
+    // Start thread 
+    L4_Start(thread_id, (L4_Word_t)&test_stack[1024], (L4_Word_t)&testThread);
+
     /* Spin forever */
     while (42);
     

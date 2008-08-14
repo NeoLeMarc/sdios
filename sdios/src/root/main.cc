@@ -350,8 +350,8 @@ int main(void) {
     printf("[RT] Told Taskserver to start Nameserver\n");
 
     // Ask Taskserver to kill IO-DSM
-    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);
-    printf("[RT] Told Taskserver to kill IO-DSM\n");
+//    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);
+//    printf("[RT] Told Taskserver to kill IO-DSM\n");
 
 
     /****************************************************************

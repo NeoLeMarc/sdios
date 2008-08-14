@@ -32,6 +32,10 @@ L4_Word_t next_thread_idx = 0, next_as_idx;
 as_t * get_free_ascb() {
   for (L4_Word_t i = next_as_idx; i != next_as_idx - 1; i = (i + 1) % MAX_NUM_SPACES) {
     if (spaces[i].firstThread == NULL) {
+
+      // Initialize ASCB 
+      memset((void *)&spaces[i], 0, sizeof(as_t));
+
       return &spaces[i];
     }
   }
@@ -40,7 +44,11 @@ as_t * get_free_ascb() {
 
 thread_t * get_free_tcb() {
   for (L4_Word_t i = next_thread_idx; i != next_thread_idx - 1; i = (i + 1) % MAX_NUM_THREADS) {
-    if (threads[i].nextThread == NULL) {
+    if (threads[i].as == NULL) {
+     
+      // Initialize TCB
+      memset((void *)&threads[i], 0, sizeof(thread_t));
+
       return &threads[i];
     }
   }
@@ -85,12 +93,14 @@ void delete_tcb(thread_t * thread) {
     // if thread->nextThread == NULL, space gets therefore marked free
   } else {
     thread_t * cur = space->firstThread;
-    while (cur->nextThread != thread) {
+    while (cur->nextThread != thread && cur->nextThread != NULL) {
       cur = cur ->nextThread;
     }
     cur->nextThread = thread->nextThread;
   }
+
   thread->nextThread = NULL;
+  thread->as         = NULL;
 }
 
 inline L4_ThreadId_t get_free_threadid() {
@@ -103,18 +113,18 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
 
 {
 
-  thread_t * thread = get_free_tcb();
-  as_t * space = get_free_ascb();
+  thread_t * thread  = get_free_tcb();
+  as_t * space       = get_free_ascb();
   space->firstThread = thread;
-  thread->as = space;
+  thread->as         = space;
 
   // Get a new Thread ID
-  L4_ThreadId_t threadId = get_free_threadid();
-  thread->globalid = threadId;
+  L4_ThreadId_t threadId  = get_free_threadid();
+  thread->globalid        = threadId;
   L4_ThreadId_t nilthread = L4_nilthread;
   L4_ThreadId_t anythread = L4_anythread;
-  L4_ThreadId_t myself = L4_Myself();
-  L4_Fpage_t kiparea = L4_FpageLog2(0xB0000000, 14);
+  L4_ThreadId_t myself    = L4_Myself();
+  L4_Fpage_t kiparea      = L4_FpageLog2(0xB0000000, 14);
 
   // Setup corba environment
   CORBA_Environment env (idl4_default_environment);
@@ -162,7 +172,7 @@ IDL4_INLINE void taskserver_kill_implementation(CORBA_Object _caller, const L4_T
   // Ask syscall server to do terminate thread 
   L4_ThreadId_t nilthread = L4_nilthread;
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, thread, &nilthread, &nilthread, &nilthread, -1UL, &env);
-  
+ 
   delete_tcb(tcb);
   
   return;
@@ -188,22 +198,24 @@ IDL4_INLINE L4_ThreadId_t taskserver_createThread_implementation(CORBA_Object _c
 
   // Find address space
   thread_t * caller = find_tcb((L4_ThreadId_t)_caller);
-  as_t * space = caller->as;
+  as_t * space      = caller->as;
     
   // Setup corba environment
   CORBA_Environment env (idl4_default_environment);
 
   // Acquire a free global thread ID
   L4_ThreadId_t newthreadid = get_free_threadid();
-  thread_t * newthread = get_free_tcb();
-  newthread->nextThread = caller->nextThread;
-  caller->nextThread = newthread;
-  newthread->globalid = newthreadid;
-  L4_ThreadId_t myself = L4_Myself();
+  thread_t * newthread      = get_free_tcb();
+  newthread->nextThread     = caller->nextThread;
+  caller->nextThread        = newthread;
+  newthread->globalid       = newthreadid;
+  newthread->localid        = get_free_localid(space);
+  newthread->as             = space;
+  L4_ThreadId_t myself      = L4_Myself();
 
   /* implementation of IF_TASK::createThread */
 
-  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &newthreadid, (L4_ThreadId_t*)&_caller, &myself, &ram_dsm_id, -1UL, &env);
+  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &newthreadid, (L4_ThreadId_t*)&_caller, &myself, &ram_dsm_id, newthread->localid.raw, &env);
   
   return newthreadid;
 }

@@ -18,7 +18,7 @@ IDL4_INLINE void syscall_ThreadControl_implementation(CORBA_Object _caller, cons
 {
   /* implementation of IF_SYSCALL::ThreadControl */
 
-  printf("Syscallserver: ThreadControl called ");
+  printf("[SYSCALLSERVER]: ThreadControl called ");
   L4_Word_t result = L4_ThreadControl(*dest, *SpaceSpecifier, *scheduler, *pager, (void *)UtcbLocation);
   if (result == 0) {
     printf("and failed ");
@@ -65,7 +65,7 @@ IDL4_INLINE void syscall_SpaceControl_implementation(CORBA_Object _caller, const
 {
   /* implementation of IF_SYSCALL::SpaceControl */
 
-  printf("Syscallserver: SpaceControl called ");
+  printf("[SYSCALLSERVER]: SpaceControl called ");
   L4_Word_t result = L4_SpaceControl(*SpaceSpecifier, control, *KernelInterfacePageArea, *UtcbArea, *Redirector, old_Control);
   if (result == 0) {
     printf("and failed ");
