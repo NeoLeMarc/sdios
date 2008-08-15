@@ -7,6 +7,7 @@
 #include <l4/thread.h>
 #include <l4/kip.h>
 #include <l4io.h>
+#include <l4/sigma0.h>
 
 #include <sdi/types.h>
 #include <sdi/sdi.h>
@@ -33,38 +34,6 @@ void testThread(){
     while(42);
 }
 
-void RequestPage(int base, int size){
-    /* Try to get all memory from sigma0 */
-    L4_Msg_t requestMemoryMsg;
-
-    /* Build message */
-    L4_Word_t registers[2];
-    registers[0] = 0;
-    registers[1] = 0; //L4_UncacheableMemory;
-
-    /* Request whole Memory */
-    L4_Fpage_t fpage = L4_Fpage(base, size);
-    registers[0] = fpage.raw;
-
-    /* Put into requestMemoryMsg */
-    L4_MsgPut(&requestMemoryMsg, -6 << 4, 2, registers, 0, NULL);
-
-    /* Load into registers */
-    L4_Load(&requestMemoryMsg);
-
-    /* Accept mapping idempotently */
-    L4_Accept(L4_MapGrantItems(fpage));
-
-    /* Send & Receive IPC */
-    L4_ThreadId_t sigma0 = L4_GlobalId(0x000c0001 >> 14, 1);
-    L4_Call(sigma0);
-
-    /* Print response from sigma0 */
-    printf("Error Code: %i\n", (int)L4_ErrorCode());
-
-    printf("If you are here, then you probably got a mapping from sigma0!\n");
-}
-
 int main () {
     printf ("IO Dataspace Manager is alive\n");
 
@@ -77,19 +46,26 @@ int main () {
     printf("Searching for architecture specific memory...\n");
     L4_MemoryDesc_t * memdesc; 
     int size = 0;    
+    L4_Fpage_t requestFpage;
 
     for(unsigned int i = 0; i < L4_NumMemoryDescriptors(kip); i++){
         memdesc = (L4_MemoryDesc_t *)L4_MemoryDesc(kip, i);
         if((L4_Type(memdesc) & L4_ArchitectureSpecificMemoryType) == L4_ArchitectureSpecificMemoryType){
 
             // print success message 
-            printf("Found architecture specific type at %x-%x\n", L4_Low(memdesc), L4_High(memdesc));
+            printf("Found architecture specific type at %lx-%lx\n", memdesc->x.low, memdesc->x.high);
 
             // Calculate size of Memory
             size = L4_High(memdesc) - L4_Low(memdesc);
 
             // request memory from sigma0
-            RequestPage(L4_High(memdesc), size); 
+            requestFpage = L4_Fpage(L4_Low(memdesc), size); 
+            printf("[IO-DSM] Requesting fpage: %lx\n", requestFpage.raw);
+            if(L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, requestFpage, requestFpage))){
+                printf("[IO-DSM] Fpage request failed!\n");
+            } else {
+                printf("[IO-DSM] Fpage request succeeded!\n");
+            }
         }
     }
     printf("Finished searching for architecture spefic memory!\n");

@@ -122,6 +122,11 @@ thread_t * find_tcb(L4_ThreadId_t threadid) {
 
 void delete_tcb(thread_t * thread) {
   as_t * space = thread->as;
+
+  // Mark listeners as free (non-thread-safe)
+  for (listener_t * listener = thread->firstListener; listener != NULL; listener = listener->nextListener)
+    listener->listeningThread = L4_nilthread;
+
   if (space->firstThread == thread) {
     space->firstThread = thread->nextThread;
     // if thread->nextThread == NULL, space gets therefore marked free
@@ -211,6 +216,7 @@ IDL4_INLINE void taskserver_kill_implementation(CORBA_Object _caller, const L4_T
   listener_t * cur = tcb->firstListener;
   while (cur != NULL) {
 
+    // Send reply to dangling waitTid call
     IF_TASK_waitTid_reply((CORBA_Object) cur->listeningThread, 0);
 
     // Process next Listener

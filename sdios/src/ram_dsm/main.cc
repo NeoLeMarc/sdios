@@ -27,6 +27,10 @@ int main () {
     printf ("[RAM-DSM] is alive\n");
 
     // Try to get whole memory from sigma0
+    // We are starting at 1 MB, because we do
+    // not want to fiddle around with architecture
+    // specific stuff like EBDA etc. IO-DSM has to 
+    // take this memory later.
     for (L4_Word_t i = 0x00100000UL; i < 0x02000000UL; i += 0x1000UL) {
       if (!L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, L4_FpageLog2(i, 12), L4_FpageLog2(i, 12)))) {
         // page size is 2^12, 2^5 bits per word
