@@ -18,7 +18,7 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_srcdir)/include/$(ARCH)/sdi.ld
 
 SRCS=		$(ARCH)-crt0.S \
-		main.cc
+		main.cc console.cc
 
 IDLS=           
 

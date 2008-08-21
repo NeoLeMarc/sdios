@@ -1,0 +1,11 @@
+0 Schwarz
+1 Blau
+2 Grün
+3 Türkis
+4 Rot
+5 Pink
+6 Braun/Gelb
+7 Grau/Weiß
+jeweils +8 ergibt helleren Ton
+jeweils *16 für Hintergrund
+jeweils +128 für nicht funktionierendes Blinken

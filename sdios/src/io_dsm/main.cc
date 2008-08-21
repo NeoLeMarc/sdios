@@ -24,6 +24,8 @@ L4_ThreadId_t locatorid;
 L4_ThreadId_t taskserver_id;
 L4_Word_t     test_stack[1024];
 
+extern int consoleServer();
+
 void testThread(){
     CORBA_Environment env (idl4_default_environment);
     printf("Test Thread up & running!\n");
@@ -53,7 +55,7 @@ int main () {
         if((L4_Type(memdesc) & L4_ArchitectureSpecificMemoryType) == L4_ArchitectureSpecificMemoryType){
 
             // print success message 
-            printf("Found architecture specific type at %lx-%lx\n", memdesc->x.low, memdesc->x.high);
+            printf("Found architecture specific type at %lx-%lx\n", memdesc->x.low << 10, memdesc->x.high << 10);
 
             // Calculate size of Memory
             size = L4_High(memdesc) - L4_Low(memdesc);
@@ -67,6 +69,14 @@ int main () {
                 printf("[IO-DSM] Fpage request succeeded!\n");
             }
         }
+    }
+    // Explicitly request VGA area
+    requestFpage = L4_Fpage(0xb8000UL, 0x1000UL);
+    printf("[IO-DSM] Requesting fpage: %lx\n", requestFpage.raw);
+    if(L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, requestFpage, requestFpage))){
+        printf("[IO-DSM] Fpage request failed!\n");
+    } else {
+        printf("[IO-DSM] Fpage request succeeded!\n");
     }
     printf("Finished searching for architecture spefic memory!\n");
 
@@ -116,6 +126,9 @@ int main () {
     printf("Waiting for new thread to terminate...");
     L4_Word_t status = IF_TASK_waitTid((CORBA_Object) taskserver_id, &thread_id, &env);
     printf("... done!%lx\n", status);
+
+    // Start console Server
+    consoleServer();
 
     /* Spin forever */
     while (42);
