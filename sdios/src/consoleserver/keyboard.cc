@@ -28,8 +28,22 @@ IDL4_INLINE void keyboard_interrupt_implementation(CORBA_Object _caller, idl4_se
 
 {
   /* implementation of IF_INTERRUPT::interrupt */
-  printf("[KBD] Got interrupt %ld", L4_ThreadNo((L4_ThreadId_t)_caller));
-  
+  printf("[KBD] Got interrupt %ld\n", L4_ThreadNo((L4_ThreadId_t)_caller));
+
+  L4_Word_t kbreg=0x60, ctrlreg=0x64;
+  unsigned char scancode = 0, status = 0;
+  asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
+
+  while (status & 1) { // Output buffer full, can be read
+    asm volatile ("inb %w1, %0" : "=a"(scancode):"dN"(kbreg));
+    printf("[KBD] Received scancode %x\n", scancode);
+
+    asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
+  }
+
+  // reenable interrupt
+  L4_LoadMR(0, 0UL);
+  L4_Send(L4_GlobalId(1,1));
   return;
 }
 

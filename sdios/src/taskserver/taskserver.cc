@@ -283,6 +283,7 @@ IDL4_INLINE L4_ThreadId_t taskserver_createThread_implementation(CORBA_Object _c
   /* implementation of IF_TASK::createThread */
 
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &newthreadid, (L4_ThreadId_t*)&_caller, &myself, &ram_dsm_id, newthread->localid.raw, &env);
+  IF_BIELFLOADER_copyAssociation((CORBA_Object)ram_dsm_id, &(caller->globalid), &newthreadid, &env);
   
   return newthreadid;
 }
