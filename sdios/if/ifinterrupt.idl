@@ -1,0 +1,8 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_INTERRUPT_ID)]
+
+interface IF_INTERRUPT{
+    [kernelmsg(idl4::interrupt)] 
+    void interrupt();
+};

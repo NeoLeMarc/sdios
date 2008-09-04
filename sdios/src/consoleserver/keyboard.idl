@@ -1,0 +1,8 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <ifinterrupt.idl>
+#include <ifkeyboard.idl>
+
+
+interface keyboard : IF_KEYBOARD, IF_INTERRUPT {
+};

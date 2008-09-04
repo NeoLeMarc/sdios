@@ -36,7 +36,7 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-SUBDIRS=	root ram_dsm io_dsm nameserver taskserver 
+SUBDIRS=	root ram_dsm io_dsm nameserver taskserver consoleserver
 
 
 include $(top_srcdir)/Mk/l4.subdir.mk

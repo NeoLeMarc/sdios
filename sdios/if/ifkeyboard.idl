@@ -1,0 +1,9 @@
+import "sdi/types.h";
+import "sdi/keyboard.h";
+#include <types.idl>
+[uuid(IF_KEYBOARD_ID)]
+
+interface IF_KEYBOARD{
+    // Read Input from Keyboard
+    void read(out keyboardBuffer buffer);
+};

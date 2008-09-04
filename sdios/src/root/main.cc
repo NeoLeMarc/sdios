@@ -285,10 +285,12 @@ int main(void) {
 	    panic ("Was not able to get bootinfo");
     }
 
-    // Bring in some other pages needed later by other threads in our AS, 
-    // wrapped in printf in order to not get optimized away
+    // Bring in some other pages needed later by other threads in our AS. 
     // Do not remove - or do you want OpenSSL disaster, part 2?
-    printf("", *((L4_Word_t *)0x00304018UL), *((L4_Word_t *)0x00305018UL));
+    volatile L4_Word_t dummy;
+    dummy = *((L4_Word_t *)0x00304018UL);
+    dummy = *((L4_Word_t *)0x00305018UL);
+    dummy = *((L4_Word_t *)0x00301d40UL);
 
     /* Quick check */
     if (!L4_BootInfo_Valid ((void*)L4_BootInfo (L4_KernelInterface ()))) 
@@ -346,8 +348,16 @@ int main(void) {
                                     // but IDL4 does something really stupid at this point.
 
     *(L4_Word_t *)nameserverPath = 4; // Module 4 == Nameserver 
-    IF_TASK_startTask((CORBA_Object) taskserver_id, nameserverPath, args, penv, &env);
-    printf("[RT] Told Taskserver to start Nameserver\n");
+    L4_ThreadId_t nameserver_id = IF_TASK_startTask((CORBA_Object) taskserver_id, nameserverPath, args, penv, &env);
+    printf("[RT] Taskserver started Nameserver as %08lx\n", nameserver_id);
+
+    // Use Taskserver to start Consoleserver
+    CORBA_char consoleserverPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+
+    *(L4_Word_t *)consoleserverPath = 6; // Module 6 == Consoleserver 
+    L4_ThreadId_t consoleserver_id = IF_TASK_startTask((CORBA_Object) taskserver_id, consoleserverPath, args, penv, &env);
+    printf("[RT] Taskserver started Consoleserver as %08lx\n", consoleserver_id);
 
     // Ask Taskserver to kill IO-DSM
 //    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);
