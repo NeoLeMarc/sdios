@@ -317,24 +317,25 @@ src/io_dsm/Makefile
 src/nameserver/Makefile
 src/taskserver/Makefile
 src/consoleserver/Makefile
+src/ramdisk/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile
 util/piggybacker/ofppc/Makefile
 util/piggybacker/ofppc64/Makefile
 ])
-m4trace:configure.in:472: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([LIB@&t@OBJS])
-m4trace:configure.in:472: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.in:472: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([LTLIBOBJS])
-m4trace:configure.in:472: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([top_builddir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([srcdir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([abs_srcdir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([top_srcdir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([abs_top_srcdir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([builddir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([abs_builddir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([abs_top_builddir])
-m4trace:configure.in:472: -1- AC_SUBST_TRACE([INSTALL])
+m4trace:configure.in:473: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([LIB@&t@OBJS])
+m4trace:configure.in:473: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.in:473: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([LTLIBOBJS])
+m4trace:configure.in:473: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([top_builddir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([srcdir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([abs_srcdir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([top_srcdir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([abs_top_srcdir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([builddir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([abs_builddir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([abs_top_builddir])
+m4trace:configure.in:473: -1- AC_SUBST_TRACE([INSTALL])

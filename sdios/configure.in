@@ -462,6 +462,7 @@ src/io_dsm/Makefile
 src/nameserver/Makefile
 src/taskserver/Makefile
 src/consoleserver/Makefile
+src/ramdisk/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile

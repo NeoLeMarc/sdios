@@ -1,0 +1,21 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_BLOCK_ID)]
+
+interface IF_BLOCK{
+  exception invalidBlockSize{};
+  exception invalidBlock{};
+  exception hardwareError{};
+
+  int getBlockCount();
+  int getBlockSize();
+
+  void readBlock(in L4_Word_t blockNr, out buffer_t buffer)
+    raises(invalidBlock, hardwareError);
+
+
+  void writeBlock(in L4_Word_t blockNr, in buffer_t buffer)
+    raises(invalidBlock, invalidBlockSize, hardwareError);
+
+};
+// vim:sw=2:ts=2:expandtab:
