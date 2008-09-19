@@ -8,6 +8,7 @@
  *****************************************************************/
 
 #include <idl4glue.h>
+#include <l4io.h>
 #include "ramdisk-server.h"
 #include "ramdisk.h"
 
@@ -47,9 +48,13 @@ IDL4_INLINE void ramdisk_readBlock_implementation(CORBA_Object _caller, const L4
 
 {
   /* implementation of IF_BLOCK::readBlock */
+
+  printf("[RAMDISK] read block (%i) called!\n", blockNr);  
   
   // Copy block to buffer  
   memcpy(buffer, filesystemModule + (blocksize * blockNr), blocksize);
+
+  printf("[RAMDISK] read block finished!\n");
 
   return;
 }
@@ -76,7 +81,9 @@ void **ramdisk_itable[16] = { ramdisk_vtable_discard, ramdisk_vtable_discard, ra
 void ramdisk_server(L4_BootRec_t * fsModule)
 
 {
+    printf("Foo!\n");
   filesystemModule = fsModule;
+  printf("Bar?!\n");
 
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;
