@@ -13,10 +13,36 @@
 #include "ramdisk.h"
 
 // Filesystem information 
+#define FILESYSTEM_MODULE_ID 8
+
 L4_BootRec_t * filesystemModule; // Grub module storing the filesystem
 int            blocksize = 4096; // Size of filesystem blocks
 
+// Locate module with filesystem
+void locateFilesystemModule(){
+    printf("[RAMDISK] Trying to find boot module\n");
 
+    // get filesystem bootloader module 
+    L4_BootInfo_t * bootinfo = (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface());
+
+    printf("[RAMDISK] Got boot info, trying to locate Module ID\n");
+        
+    if (L4_BootInfo_Entries (bootinfo) < FILESYSTEM_MODULE_ID)
+        panic ("[RAMDISK] Some modules are missing\n");
+
+    printf("[RAMDISK] trying to locate first boot info entry\n");
+
+    filesystemModule  = L4_BootInfo_FirstEntry (bootinfo);
+
+    printf("[RAMDISK] iterating through boot info\n");
+
+    for (unsigned int i = 0; i < FILESYSTEM_MODULE_ID; i++){
+        filesystemModule = L4_Next (filesystemModule);
+    }
+
+    printf("[RAMDISK] found filesystem module at 0x%08lx\n", filesystemModule);
+
+}
 
 /* Interface ramdisk */
 
@@ -49,6 +75,7 @@ IDL4_INLINE void ramdisk_readBlock_implementation(CORBA_Object _caller, const L4
 {
   /* implementation of IF_BLOCK::readBlock */
 
+  locateFilesystemModule();
   printf("[RAMDISK] read block (%i) called!\n", blockNr);  
   
   // Copy block to buffer  
@@ -65,7 +92,8 @@ IDL4_INLINE void ramdisk_writeBlock_implementation(CORBA_Object _caller, const L
 
 {
   /* implementation of IF_BLOCK::writeBlock */
-  
+  locateFilesystemModule();
+ 
   // Copy buffer to block
   memcpy(filesystemModule + (blocksize * blockNr), buffer, blocksize);
 
@@ -78,12 +106,9 @@ void *ramdisk_vtable_9[RAMDISK_DEFAULT_VTABLE_SIZE] = RAMDISK_DEFAULT_VTABLE_9;
 void *ramdisk_vtable_discard[RAMDISK_DEFAULT_VTABLE_SIZE] = RAMDISK_DEFAULT_VTABLE_DISCARD;
 void **ramdisk_itable[16] = { ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_9, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard };
 
-void ramdisk_server(L4_BootRec_t * fsModule)
+void ramdisk_server()
 
 {
-    printf("Foo!\n");
-  filesystemModule = fsModule;
-  printf("Bar?!\n");
 
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;

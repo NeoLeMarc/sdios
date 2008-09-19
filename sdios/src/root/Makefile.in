@@ -23,7 +23,7 @@ SRCS=		$(ARCH)-crt0.S \
 
 IDLS=		locator.idl syscall.idl
 
-LIBS+=		-ll4 -lio -lsdi
+LIBS+=		-lio -lsdi -ll4
 LDFLAGS+=	-O 3 -Ttext=$(ROOTTASK_LINKBASE) -T $(top_builddir)/include/$(ARCH)/sdi.ld
 
 

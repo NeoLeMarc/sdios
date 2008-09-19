@@ -19,7 +19,6 @@
 #include "ramdisk.h"
 
 
-#define FILESYSTEM_MODULE_ID 8
 
 L4_ThreadId_t locatorid; 
 L4_ThreadId_t ram_dsm_id; 
@@ -38,26 +37,8 @@ int main(){
     // Register Ramdisk with Locator
     L4_ThreadId_t taskserverId = L4_Myself();
     IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_BLOCK_ID, &taskserverId, &env);     
-
-    // get filesystem bootloader module 
-    L4_BootRec_t *  filesystemModule;
-    L4_BootInfo_t * bootinfo = (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface());
-
     printf("[RAMDISK] registered with locator\n");
 
-        
-    if (L4_BootInfo_Entries (bootinfo) < FILESYSTEM_MODULE_ID)
-        panic ("[RAMDISK] Some modules are missing\n");
-
-    filesystemModule  = L4_BootInfo_FirstEntry (bootinfo);
-
-    for (unsigned int i = 0; i < FILESYSTEM_MODULE_ID; i++){
-        filesystemModule = L4_Next (filesystemModule);
-    }
-
-    printf("[RAMDISK] found filesystem module at 0x%08lx\n", filesystemModule);
-
     // start ramdisk server
-   // ramdisk_server(filesystemModule);
-   ramdisk_server(filesystemModule);
+   ramdisk_server();
 }

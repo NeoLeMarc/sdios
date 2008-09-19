@@ -367,6 +367,14 @@ int main(void) {
     L4_ThreadId_t ramdisk_id = IF_TASK_startTask((CORBA_Object) taskserver_id, ramdiskPath, args, penv, &env);
     printf("[RT] Taskserver started Ramdisk as %08lx\n", ramdisk_id);
 
+    // Use Taskserver to start testclient 
+    CORBA_char testclientPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+
+    *(L4_Word_t *)testclientPath = 9; // Module 9 == Testclient 
+    L4_ThreadId_t testclient_id = IF_TASK_startTask((CORBA_Object) taskserver_id, testclientPath, args, penv, &env);
+    printf("[RT] Taskserver started Testclient as %08lx\n", testclient_id);
+
 
 
     // Ask Taskserver to kill IO-DSM

@@ -463,6 +463,7 @@ src/nameserver/Makefile
 src/taskserver/Makefile
 src/consoleserver/Makefile
 src/ramdisk/Makefile
+src/test/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile
