@@ -362,11 +362,11 @@ int main(void) {
     // Use Taskserver to start ramdisk 
     CORBA_char ramdiskPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
-/*
+
     *(L4_Word_t *)ramdiskPath = 7; // Module 7 == Ramdisk 
     L4_ThreadId_t ramdisk_id = IF_TASK_startTask((CORBA_Object) taskserver_id, ramdiskPath, args, penv, &env);
     printf("[RT] Taskserver started Ramdisk as %08lx\n", ramdisk_id);
-*/
+
 
 
     // Ask Taskserver to kill IO-DSM

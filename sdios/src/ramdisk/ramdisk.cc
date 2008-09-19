@@ -11,8 +11,11 @@
 #include "ramdisk-server.h"
 #include "ramdisk.h"
 
-// Filesystem module
-L4_BootRec_t * filesystemModule;
+// Filesystem information 
+L4_BootRec_t * filesystemModule; // Grub module storing the filesystem
+int            blocksize = 4096; // Size of filesystem blocks
+
+
 
 /* Interface ramdisk */
 
@@ -31,7 +34,7 @@ IDL4_PUBLISH_RAMDISK_GETBLOCKCOUNT(ramdisk_getBlockCount_implementation);
 IDL4_INLINE CORBA_long ramdisk_getBlockSize_implementation(CORBA_Object _caller, idl4_server_environment *_env)
 
 {
-  CORBA_long __retval = 4096; // 4 kB is our hardware blocksize
+  CORBA_long __retval = blocksize;
 
   /* implementation of IF_BLOCK::getBlockSize */
   
@@ -45,6 +48,9 @@ IDL4_INLINE void ramdisk_readBlock_implementation(CORBA_Object _caller, const L4
 {
   /* implementation of IF_BLOCK::readBlock */
   
+  // Copy block to buffer  
+  memcpy(buffer, filesystemModule + (blocksize * blockNr), blocksize);
+
   return;
 }
 
@@ -55,6 +61,9 @@ IDL4_INLINE void ramdisk_writeBlock_implementation(CORBA_Object _caller, const L
 {
   /* implementation of IF_BLOCK::writeBlock */
   
+  // Copy buffer to block
+  memcpy(filesystemModule + (blocksize * blockNr), buffer, blocksize);
+
   return;
 }
 
@@ -64,10 +73,10 @@ void *ramdisk_vtable_9[RAMDISK_DEFAULT_VTABLE_SIZE] = RAMDISK_DEFAULT_VTABLE_9;
 void *ramdisk_vtable_discard[RAMDISK_DEFAULT_VTABLE_SIZE] = RAMDISK_DEFAULT_VTABLE_DISCARD;
 void **ramdisk_itable[16] = { ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_9, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard, ramdisk_vtable_discard };
 
-void ramdisk_server()
+void ramdisk_server(L4_BootRec_t * fsModule)
 
 {
-//  filesystemModule = fsModule;
+  filesystemModule = fsModule;
 
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;
