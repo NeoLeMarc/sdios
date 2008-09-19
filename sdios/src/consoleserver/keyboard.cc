@@ -11,6 +11,8 @@
 #include <l4io.h>
 #include "keyboard-server.h"
 #include "keyboard.h"
+#include "keymap.cc"
+
 
 /* Interface keyboard */
 
@@ -28,15 +30,29 @@ IDL4_INLINE void keyboard_interrupt_implementation(CORBA_Object _caller, idl4_se
 
 {
   /* implementation of IF_INTERRUPT::interrupt */
-  printf("[KBD] Got interrupt %ld\n", L4_ThreadNo((L4_ThreadId_t)_caller));
 
   L4_Word_t kbreg=0x60, ctrlreg=0x64;
-  unsigned char scancode = 0, status = 0;
+  L4_Word8_t scancode = 0, status = 0, ledstatus = 0;
+  char charstr[MAX_CHAR_LEN] = "";
+  extern modifiers_t modifiers;
+
   asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
 
   while (status & 1) { // Output buffer full, can be read
     asm volatile ("inb %w1, %0" : "=a"(scancode):"dN"(kbreg));
     printf("[KBD] Received scancode %x\n", scancode);
+
+    keycodeToChars(scancode, (char *) charstr);
+    if (scancode == 0x3a  // CapsLock make
+     || scancode == 0x45  // NumLock make
+     || scancode == 0x46) // ScrollLock make
+    {
+        ledstatus = modifiers.capsLock << 2 + modifiers.numLock << 1 + modifiers.scrollLock << 1;
+        asm volatile ("outb %1, %w0 \n" :: "dN"(kbreg), "a"(0xed));
+        asm volatile ("outb %1, %w0 \n" :: "dN"(kbreg), "a"(ledstatus)); // update LEDs
+    }
+
+    printf("[KBD] Resulting char sequence \"%s\"\n", charstr);
 
     asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
   }
