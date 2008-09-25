@@ -53,5 +53,8 @@ int main(){
     L4_ThreadId_t kbdInterrupt = L4_GlobalId(1, 1);
     IF_SYSCALL_ThreadControl((CORBA_Object) syscall_id, &kbdInterrupt, &kbdInterrupt, &nilthread, &keyboard_id, -1, &env);
 
+    // Announce keyboard server for test client
+    IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_KEYBOARD_ID, &keyboard_id, &env);
+
     while (42);
 }

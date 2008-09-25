@@ -16,11 +16,14 @@
 #include <if/iftask.h>
 #include <if/ifbielfloader.h>                                                                             
 #include <if/ifblock.h>                                                                             
+#include <if/ifkeyboard.h>                                                                             
+#include <sdi/keyboard.h>
 
 
 L4_ThreadId_t locatorid; 
 L4_ThreadId_t taskserver_id;
 L4_ThreadId_t ramdisk_id;
+L4_ThreadId_t keyboard_id;
 
 int main () {
     printf("[TESTCLIENT] is alive\n");
@@ -28,7 +31,7 @@ int main () {
     printf("*********************************************\n");
 
     // Give system time to initialize
-    L4_Time_t t = L4_TimePeriod (500000);
+    L4_Time_t t = L4_TimePeriod (5000000);
     L4_Sleep(t);
 
     // Setup CORBA environment
@@ -40,9 +43,10 @@ int main () {
     locatorid  = IF_BIELFLOADER_getLocator((CORBA_Object) ram_dsm_id, &env);
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_TASK_ID, &taskserver_id, &env);
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_BLOCK_ID, &ramdisk_id, &env);
+    IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_KEYBOARD_ID, &keyboard_id, &env);
     
     printf("[TESTCLIENT] Located ramdisk at 0x%08lx\n", ramdisk_id.raw);
-
+/*
     // Talk to ramdisk
     //
     // Get blocksize
@@ -58,7 +62,19 @@ int main () {
     
     printf("*********************************************\n");
     printf("[TESTCLIENT] End of system component tests\n");
+*/
+    // Read some chars from keyboard
+    keyboardBuffer kbbuf;
+    char mybuf[8];
+    t = L4_TimePeriod (2000000);
+    while (42) {
+        IF_KEYBOARD_read((CORBA_Object) keyboard_id, &kbbuf, &env);
+        strncpy(mybuf, kbbuf.chars, 7);
+        printf("[TESTCLIENT] Read keyboard buffer. Got %d chars (\"%s\"), more: %d\n", kbbuf.numchars, mybuf, kbbuf.more);
+        if (!kbbuf.more) 
+            L4_Sleep(t);
 
+    }
     /* Spin forever */
     while (42);
     

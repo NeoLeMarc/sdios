@@ -162,9 +162,8 @@ keymap stdmap = {
 	}
 };
 
-void keycodeToChars(char scancode, char * buf) {
+char * keycodeToChars(unsigned char scancode, char * buf) {
     char * current;
-    char null[1] = "";
     switch (scancode) {
         case 0xe0: // Escape... just discard, something meaningful should happen anyway :)
             break;
@@ -225,10 +224,15 @@ void keycodeToChars(char scancode, char * buf) {
                             current = (char *)stdmap.ctrlaltshift;
                     }
                 }
-                strncpy(buf, current + (scancode * MAX_CHAR_LEN), MAX_CHAR_LEN);
-                return;
+                // select respective char string
+                current += scancode * MAX_CHAR_LEN;
+                // copy char string into buffer
+                int maxchars = MAX_CHAR_LEN;
+                while ((maxchars-- > 0) && !( *(buf++) = *(current++) ))
+                    ;
             }
-        }
-    // no scancode handled by the array, so pad with null characters
-    strncpy(buf, (char *)null, MAX_CHAR_LEN);
+    }
+    // terminate string and return new buffer position
+    *buf = 0;
+    return buf;
 }

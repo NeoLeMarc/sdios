@@ -11,9 +11,9 @@
 typedef struct {
     struct {
         unsigned char numchars : 6;
-        unsigned char reserved : 1;
+        unsigned char          : 1; // reserved
         unsigned char more     : 1;
-    } status;
+    };
     char chars[7];
 } keyboardBuffer;
 

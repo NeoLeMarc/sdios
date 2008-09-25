@@ -9,19 +9,62 @@
 
 #include <idl4glue.h>
 #include <l4io.h>
+
 #include "keyboard-server.h"
 #include "keyboard.h"
 #include "keymap.cc"
+#include <sdi/keyboard.h>
 
+#define BUFFER_LENGTH 1024
+char buffer[BUFFER_LENGTH];
+char *  buffer_pos = (char *)buffer;
+L4_ThreadId_t clientWaiting = L4_nilthread;
+keyboardBuffer * clientBuffer;
 
 /* Interface keyboard */
 
-IDL4_INLINE void keyboard_read_implementation(CORBA_Object _caller, keyboardBuffer *buffer, idl4_server_environment *_env)
+inline void keyboard_read_processbuffers(keyboardBuffer *outBuffer) {
+    // get number of waiting chars
+    unsigned int chars_in_buf = buffer_pos - (char *)buffer;
+    // copy at most 7 chars from input buffer to message
+    strncpy(outBuffer->chars, buffer, 7);
+    // maximum chars per message is 7
+    if (chars_in_buf <= 7) {
+        outBuffer->more = 0;
+        outBuffer->numchars = chars_in_buf;
+        buffer[0] = 0;
+        buffer_pos = buffer;
+    } else {
+        outBuffer->more = 1;
+        outBuffer->numchars = 7;
+        strncpy(buffer, buffer + 7, BUFFER_LENGTH - 7);
+        buffer_pos -= 7;
+    }
+}
+
+IDL4_INLINE void keyboard_read_implementation(CORBA_Object _caller, keyboardBuffer *outBuffer, idl4_server_environment *_env)
 
 {
-  /* implementation of IF_KEYBOARD::read */
+    // is there any data at all?
+    if (buffer != buffer_pos) {
+        keyboard_read_processbuffers(outBuffer);
+    } else if (L4_IsNilThread(clientWaiting)) { // no data available, no blocking client -> block
+        idl4_set_no_response(_env);
+        clientWaiting = (L4_ThreadId_t)_caller;
+        clientBuffer = outBuffer;
+    } else { // no data, another client blocking -> return empty
+        outBuffer->more = 0;
+        outBuffer->numchars = 0;
+        outBuffer->chars[0] = 0;
+        outBuffer->chars[1] = 0;
+        outBuffer->chars[2] = 0;
+        outBuffer->chars[3] = 0;
+        outBuffer->chars[4] = 0;
+        outBuffer->chars[5] = 0;
+        outBuffer->chars[6] = 0;
+    }
   
-  return;
+    return;
 }
 
 IDL4_PUBLISH_KEYBOARD_READ(keyboard_read_implementation);
@@ -33,16 +76,16 @@ IDL4_INLINE void keyboard_interrupt_implementation(CORBA_Object _caller, idl4_se
 
   L4_Word_t kbreg=0x60, ctrlreg=0x64;
   L4_Word8_t scancode = 0, status = 0, ledstatus = 0;
-  char charstr[MAX_CHAR_LEN] = "";
   extern modifiers_t modifiers;
 
   asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
 
-  while (status & 1) { // Output buffer full, can be read
+  while ((status & 1) && (buffer_pos < (char*)buffer + BUFFER_LENGTH - MAX_CHAR_LEN)) { // Output buffer full, can be read
     asm volatile ("inb %w1, %0" : "=a"(scancode):"dN"(kbreg));
-    printf("[KBD] Received scancode %x\n", scancode);
 
-    keycodeToChars(scancode, (char *) charstr);
+    // decode scancode into buffer
+    buffer_pos = keycodeToChars(scancode, buffer_pos);
+    
     if (scancode == 0x3a  // CapsLock make
      || scancode == 0x45  // NumLock make
      || scancode == 0x46) // ScrollLock make
@@ -52,9 +95,15 @@ IDL4_INLINE void keyboard_interrupt_implementation(CORBA_Object _caller, idl4_se
         asm volatile ("outb %1, %w0 \n" :: "dN"(kbreg), "a"(ledstatus)); // update LEDs
     }
 
-    printf("[KBD] Resulting char sequence \"%s\"\n", charstr);
-
     asm volatile ("inb %w1, %0" : "=a"(status):"dN"(ctrlreg));
+  }
+
+
+  // If a client is already waiting, send him the new data right away
+  if (!L4_IsNilThread(clientWaiting) && buffer_pos != buffer) {
+      keyboard_read_processbuffers(clientBuffer);
+      IF_KEYBOARD_read_reply((CORBA_Object)clientWaiting, clientBuffer);
+      clientWaiting = L4_nilthread;
   }
 
   // reenable interrupt
