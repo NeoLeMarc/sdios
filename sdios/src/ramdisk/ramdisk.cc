@@ -7,6 +7,11 @@
  * Report bugs to haeberlen@ira.uka.de
  *****************************************************************/
 
+#include <l4/kip.h>
+#include <l4/bootinfo.h>
+#include <l4/message.h>
+#include <l4/ipc.h>
+#include <l4/sigma0.h>
 #include <idl4glue.h>
 #include <l4io.h>
 #include "ramdisk-server.h"
@@ -15,32 +20,78 @@
 // Filesystem information 
 #define FILESYSTEM_MODULE_ID 8
 
-L4_BootRec_t * filesystemModule; // Grub module storing the filesystem
-int            blocksize = 4096; // Size of filesystem blocks
+L4_BootInfo_t * bootInfo = NULL;        // Pointer to boot info
+L4_BootRec_t *  filesystemStart;        // Grub module storing the filesystem
+int             blocksize = 4096;       // Size of filesystem blocks
+L4_ThreadId_t   sigma0;                 // For reference
+L4_ThreadId_t   roottask;               
+
+// Synthesize pagefault to root task's RAM-DSM-Pager
+inline void synRootPf(L4_Word_t physAddr, L4_Word_t target) {
+    L4_Accept(L4_MapGrantItems(L4_FpageLog2(target, 12)));
+    L4_LoadMR(0, 0x40002 + (-2UL << 20)); // Label -2, read, 2 untyped
+    L4_LoadMR(1, physAddr); // fault address
+    L4_LoadMR(2, 0x12345678); // bogus IP
+    L4_Call(roottask);
+}
+
+// Map bootinfo from Roottask
+void mapBootInfo(void){
+    printf("[RAMDISK] Trying to map bootinfo from RootTask\n");
+
+    // Calculate ID of Root-Task by ThreadNo User Base
+    L4_KernelInterfacePage_t * kip = (L4_KernelInterfacePage_t *)L4_KernelInterface();
+    sigma0 = L4_GlobalId(kip->ThreadInfo.X.UserBase, 1);
+    roottask = L4_GlobalId(kip->ThreadInfo.X.UserBase + 5, 1);
+
+    printf("[RAMDISK] Roottask should be: %lx\n", roottask.raw);
+
+    // Synthesize pagefault, want bootinfo at 1 GB
+    synRootPf(L4_BootInfo(kip), 0x40000000);
+    
+    // Set pointer to bootinfo
+    bootInfo = (L4_BootInfo_t *)(0x40000000);
+
+    // If necessary, bring in further pages to get complete bootinfo
+    L4_Word_t base = 1024;
+    while (base < bootInfo->size)
+        synRootPf(L4_BootInfo(kip) + base, 0x40000000 + base);
+
+    printf("[RAMDISK] Hopefully got mapping from RootTask\n");
+
+} 
 
 // Locate module with filesystem
-void locateFilesystemModule(){
-    printf("[RAMDISK] Trying to find boot module\n");
-
-    // get filesystem bootloader module 
-    L4_BootInfo_t * bootinfo = (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface());
+void mapFilesystemModule(void){
 
     printf("[RAMDISK] Got boot info, trying to locate Module ID\n");
         
-    if (L4_BootInfo_Entries (bootinfo) < FILESYSTEM_MODULE_ID)
+    if (L4_BootInfo_Entries (bootInfo) < FILESYSTEM_MODULE_ID)
         panic ("[RAMDISK] Some modules are missing\n");
 
     printf("[RAMDISK] trying to locate first boot info entry\n");
 
-    filesystemModule  = L4_BootInfo_FirstEntry (bootinfo);
+    L4_BootRec_t *  aModule; // Grub module storing the filesystem
+    aModule  = L4_BootInfo_FirstEntry (bootInfo);
 
     printf("[RAMDISK] iterating through boot info\n");
 
     for (unsigned int i = 0; i < FILESYSTEM_MODULE_ID; i++){
-        filesystemModule = L4_Next (filesystemModule);
+        aModule = L4_Next (aModule);
     }
 
-    printf("[RAMDISK] found filesystem module at 0x%08lx\n", filesystemModule);
+    if (L4_Type(aModule) != L4_BootInfo_Module) {
+        panic("[RAMDISK] FS Module entry is not a \"Module\"");
+    }
+
+    L4_Boot_Module_t * bModule = (L4_Boot_Module_t *)aModule;
+
+    printf("[RAMDISK] found filesystem module at 0x%08lx\n", (L4_Word_t)bModule);
+
+    for (L4_Word_t pos = 0; pos <= bModule->start; pos += 1024)
+        L4_Sigma0_GetPage(sigma0, L4_FpageLog2(bModule->start + pos, 12), L4_FpageLog2(0x41000000 + pos, 12));
+
+    printf("[RAMDISK] should have got fs mapped from sigma0\n");
 
 }
 
@@ -75,11 +126,11 @@ IDL4_INLINE void ramdisk_readBlock_implementation(CORBA_Object _caller, const L4
 {
   /* implementation of IF_BLOCK::readBlock */
 
-  locateFilesystemModule();
-  printf("[RAMDISK] read block (%i) called!\n", blockNr);  
+  //locateFilesystemModule();
+  printf("[RAMDISK] read block (%ld) called!\n", blockNr);  
   
   // Copy block to buffer  
-  memcpy(buffer, filesystemModule + (blocksize * blockNr), blocksize);
+  //memcpy(buffer, filesystemModule + (blocksize * blockNr), blocksize);
 
   printf("[RAMDISK] read block finished!\n");
 
@@ -92,10 +143,9 @@ IDL4_INLINE void ramdisk_writeBlock_implementation(CORBA_Object _caller, const L
 
 {
   /* implementation of IF_BLOCK::writeBlock */
-  locateFilesystemModule();
  
   // Copy buffer to block
-  memcpy(filesystemModule + (blocksize * blockNr), buffer, blocksize);
+  memcpy(filesystemStart + (blocksize * blockNr), buffer, blocksize);
 
   return;
 }
@@ -109,6 +159,12 @@ void **ramdisk_itable[16] = { ramdisk_vtable_discard, ramdisk_vtable_discard, ra
 void ramdisk_server()
 
 {
+
+  // Map boot info
+  mapBootInfo();
+  
+  // Map filesystemModule
+  mapFilesystemModule();
 
   L4_ThreadId_t partner;
   L4_MsgTag_t msgtag;

@@ -46,7 +46,7 @@ int main () {
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_KEYBOARD_ID, &keyboard_id, &env);
     
     printf("[TESTCLIENT] Located ramdisk at 0x%08lx\n", ramdisk_id.raw);
-/*
+
     // Talk to ramdisk
     //
     // Get blocksize
@@ -62,7 +62,7 @@ int main () {
     
     printf("*********************************************\n");
     printf("[TESTCLIENT] End of system component tests\n");
-*/
+
     // Read some chars from keyboard
     keyboardBuffer kbbuf;
     char mybuf[8];
