@@ -1,0 +1,120 @@
+ia32-crt0.o: ia32-crt0.S
+main.o: main.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h string.h \
+  stdio.h signal.h ../../include/stdlib.h ../../include/sdi/types.h \
+  ../../include/l4/types.h ../../include/l4/ia32/types.h \
+  ../../include/l4/ia32/specials.h ../../include/l4/kip.h \
+  ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+  ../../include/l4/message.h ../../include/l4/thread.h sys/ioc_memory.h \
+  sys/svrctl.h minix/callnr.h minix/com.h minix/keymap.h buf.h sys/dir.h \
+  dirent.h file.h fproc.h inode.h param.h super.h
+open.o: open.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h sys/stat.h \
+  fcntl.h minix/callnr.h minix/com.h buf.h sys/dir.h dirent.h file.h \
+  fproc.h inode.h lock.h param.h super.h
+read.o: read.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h \
+  minix/com.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h param.h \
+  super.h
+write.o: write.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h string.h buf.h \
+  sys/dir.h dirent.h file.h fproc.h inode.h super.h
+pipe.o: pipe.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h signal.h \
+  minix/callnr.h minix/com.h sys/select.h sys/time.h file.h fproc.h \
+  inode.h param.h super.h select.h
+dmap.o: dmap.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fproc.h string.h \
+  ../../include/stdlib.h ../../include/sdi/types.h \
+  ../../include/l4/types.h ../../include/l4/ia32/types.h \
+  ../../include/l4/ia32/specials.h ../../include/l4/kip.h \
+  ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+  ../../include/l4/message.h ../../include/l4/thread.h ctype.h unistd.h \
+  minix/com.h param.h
+device.o: device.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h \
+  minix/callnr.h minix/com.h file.h fproc.h inode.h param.h super.h
+path.o: path.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h string.h \
+  minix/callnr.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h super.h
+mount.o: mount.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h \
+  minix/com.h sys/stat.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h \
+  param.h super.h
+link.o: link.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h sys/stat.h \
+  string.h minix/com.h minix/callnr.h buf.h sys/dir.h dirent.h file.h \
+  fproc.h inode.h param.h super.h
+super.o: super.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h string.h \
+  minix/com.h buf.h sys/dir.h dirent.h inode.h super.h
+inode.o: inode.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h buf.h sys/dir.h \
+  dirent.h file.h fproc.h inode.h super.h
+cache.o: cache.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/com.h buf.h \
+  sys/dir.h dirent.h file.h fproc.h super.h
+cache2.o: cache2.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/com.h buf.h \
+  sys/dir.h dirent.h
+filedes.o: filedes.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h file.h fproc.h \
+  inode.h
+stadir.o: stadir.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h sys/stat.h \
+  sys/statfs.h minix/com.h file.h fproc.h inode.h param.h super.h
+protect.o: protect.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h unistd.h \
+  minix/callnr.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h param.h \
+  super.h
+time.o: time.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/callnr.h \
+  minix/com.h file.h fproc.h inode.h param.h
+lock.o: lock.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/com.h \
+  fcntl.h unistd.h file.h fproc.h inode.h lock.h param.h
+misc.o: misc.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h fcntl.h unistd.h \
+  minix/callnr.h minix/com.h sys/svrctl.h buf.h sys/dir.h dirent.h file.h \
+  fproc.h inode.h param.h super.h
+utility.o: utility.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/com.h \
+  unistd.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h param.h
+select.o: select.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h select.h file.h \
+  inode.h sys/time.h sys/select.h minix/com.h string.h
+timers.o: timers.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h timers.h \
+  minix/com.h
+table.o: table.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h minix/callnr.h \
+  minix/com.h buf.h sys/dir.h dirent.h file.h fproc.h inode.h lock.h \
+  super.h
+cdprobe.o: cdprobe.c fs.h minix/config.h ansi.h sys/types.h minix/const.h \
+  minix/type.h minix/dmap.h ../../include/limits.h errno.h minix/syslib.h \
+  minix/sysutil.h const.h type.h proto.h timers.h glo.h super.h \
+  minix/com.h string.h

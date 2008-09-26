@@ -1,0 +1,39 @@
+##
+## File:  src/taskserver/Makefile.in
+##
+## Description: Makefile for minix3fs
+##
+
+srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
+top_builddir=	@top_builddir@
+
+include $(top_srcdir)/Mk/l4.base.mk
+
+PROGRAM= minix3fs
+PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
+		$(top_builddir)/lib/io/libio.a \
+		$(top_builddir)/lib/sdi/libsdi.a \
+		$(top_srcdir)/include/$(ARCH)/sdi.ld \
+
+SRCS=		$(ARCH)-crt0.S \
+		 main.c open.c read.c write.c pipe.c dmap.c \
+                 device.c path.c mount.c link.c super.c inode.c \
+                 cache.c cache2.c filedes.c stadir.c protect.c time.c \
+                 lock.c misc.c utility.c select.c timers.c table.c \
+                 cdprobe.c
+
+#IDLS=           taskserver.idl
+
+LIBS+=		-ll4 -lio -lsdi
+LDFLAGS+=	-T $(top_builddir)/include/$(ARCH)/sdi.ld
+
+CFLAGS += -I ../../include
+#CXXFLAGS += -I ../../include
+
+CFLAGS_powerpc+=	-fno-builtin
+CXXFLAGS_powerpc+=	-fno-rtti
+
+CFLAGS_alpha+=	-mno-fp-regs -O2 -freg-struct-return
+
+include $(top_srcdir)/Mk/l4.prog.mk

@@ -1,0 +1,283 @@
+ia32-crt0.o: ia32-crt0.S
+main.o: main.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/string.h ../../include/stdio.h \
+  ../../include/signal.h ../../include/stdlib_minix.h \
+  ../../include/sys/ioc_memory.h ../../include/minix/ioctl.h \
+  ../../include/sys/svrctl.h ../../include/minix/callnr.h \
+  ../../include/minix/com.h ../../include/minix/keymap.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h super.h
+open.o: open.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/sys/stat.h ../../include/fcntl.h \
+  ../../include/minix/callnr.h ../../include/minix/com.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h lock.h param.h super.h
+read.o: read.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/minix/com.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h super.h
+write.o: write.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/string.h buf.h ../../include/dirent.h file.h fproc.h \
+  inode.h super.h
+pipe.o: pipe.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/signal.h \
+  ../../include/minix/callnr.h ../../include/minix/com.h \
+  ../../include/sys/select.h ../../include/sys/time.h \
+  ../../include/string.h file.h fproc.h inode.h param.h super.h select.h
+dmap.o: dmap.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h fproc.h \
+  ../../include/string.h ../../include/stdlib_minix.h \
+  ../../include/ctype.h ../../include/unistd.h ../../include/minix/com.h \
+  param.h
+device.o: device.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/minix/callnr.h \
+  ../../include/minix/com.h file.h fproc.h inode.h param.h super.h
+path.o: path.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/string.h ../../include/minix/callnr.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h super.h
+mount.o: mount.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/minix/com.h \
+  ../../include/sys/stat.h buf.h ../../include/dirent.h file.h fproc.h \
+  inode.h param.h super.h
+link.o: link.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/sys/stat.h ../../include/string.h \
+  ../../include/minix/com.h ../../include/minix/callnr.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h super.h
+super.o: super.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/string.h ../../include/minix/com.h buf.h \
+  ../../include/dirent.h inode.h super.h
+inode.o: inode.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h super.h
+cache.o: cache.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/com.h buf.h ../../include/dirent.h file.h fproc.h \
+  super.h
+cache2.o: cache2.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/com.h buf.h ../../include/dirent.h
+filedes.o: filedes.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h file.h \
+  fproc.h inode.h
+stadir.o: stadir.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/sys/stat.h ../../include/sys/statfs.h \
+  ../../include/minix/com.h file.h fproc.h inode.h param.h super.h
+protect.o: protect.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/unistd.h ../../include/minix/callnr.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h super.h
+time.o: time.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/callnr.h ../../include/minix/com.h file.h fproc.h \
+  inode.h param.h
+lock.o: lock.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/com.h ../../include/fcntl.h ../../include/unistd.h \
+  file.h fproc.h inode.h lock.h param.h
+misc.o: misc.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/fcntl.h ../../include/unistd.h \
+  ../../include/minix/callnr.h ../../include/minix/com.h \
+  ../../include/sys/svrctl.h ../../include/minix/ioctl.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h super.h
+utility.o: utility.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/com.h ../../include/unistd.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h param.h
+select.o: select.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h select.h \
+  file.h inode.h ../../include/sys/time.h ../../include/sys/select.h \
+  ../../include/string.h ../../include/minix/com.h
+timers.o: timers.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/timers.h ../../include/minix/com.h
+table.o: table.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h \
+  ../../include/minix/callnr.h ../../include/minix/com.h buf.h \
+  ../../include/dirent.h file.h fproc.h inode.h lock.h super.h
+cdprobe.o: cdprobe.c fs.h ../../include/minix/config.h \
+  ../../include/minix/sys_config.h ../../include/ansi.h \
+  ../../include/sys/types.h ../../include/minix/const.h \
+  ../../include/minix/type.h ../../include/minix/dmap.h \
+  ../../include/minix/ipc.h ../../include/limits_minix.h \
+  ../../include/sys/dir.h ../../include/errno.h \
+  ../../include/minix/syslib.h ../../include/minix/devio.h \
+  ../../include/minix/sysutil.h const.h type.h proto.h \
+  ../../include/timers.h ../../../../include/limits.h glo.h super.h \
+  ../../include/minix/com.h ../../include/string.h

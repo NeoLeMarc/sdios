@@ -3269,7 +3269,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files config.mk Makefile if/Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile lib/sdi/Makefile serv/Makefile serv/sigma0/Makefile src/Makefile src/root/Makefile src/ram_dsm/Makefile src/io_dsm/Makefile src/nameserver/Makefile src/taskserver/Makefile src/consoleserver/Makefile src/ramdisk/Makefile src/test/Makefile util/Makefile util/kickstart/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile"
+ac_config_files="$ac_config_files config.mk Makefile if/Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile lib/sdi/Makefile serv/Makefile serv/sigma0/Makefile src/Makefile src/root/Makefile src/ram_dsm/Makefile src/io_dsm/Makefile src/nameserver/Makefile src/taskserver/Makefile src/consoleserver/Makefile src/ramdisk/Makefile src/minix3fs/Makefile src/test/Makefile util/Makefile util/kickstart/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -3843,6 +3843,7 @@ do
     "src/taskserver/Makefile") CONFIG_FILES="$CONFIG_FILES src/taskserver/Makefile" ;;
     "src/consoleserver/Makefile") CONFIG_FILES="$CONFIG_FILES src/consoleserver/Makefile" ;;
     "src/ramdisk/Makefile") CONFIG_FILES="$CONFIG_FILES src/ramdisk/Makefile" ;;
+    "src/minix3fs/Makefile") CONFIG_FILES="$CONFIG_FILES src/minix3fs/Makefile" ;;
     "src/test/Makefile") CONFIG_FILES="$CONFIG_FILES src/test/Makefile" ;;
     "util/Makefile") CONFIG_FILES="$CONFIG_FILES util/Makefile" ;;
     "util/kickstart/Makefile") CONFIG_FILES="$CONFIG_FILES util/kickstart/Makefile" ;;
