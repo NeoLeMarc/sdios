@@ -1,0 +1,31 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_FILESYSTEM_ID)]
+
+interface IF_FILESYSTEM{
+  exception fileNotFound{}; 
+  exception readError{};
+  exception writeError{};
+  exception outOfFilehandles{};
+  exception outOfMemory{};
+  exception fileExists{};
+
+  /*void readBlock(in L4_Word_t blockNr, out buffer_t buffer)
+    raises(invalidBlock, hardwareError);
+
+
+  void writeBlock(in L4_Word_t blockNr, in buffer_t buffer)
+    raises(invalidBlock, invalidBlockSize, hardwareError);*/
+
+  void listFiles(out buffer_t filenames)
+    raises(readError);
+  void mapFile(in string<16> filename, out fpage page)
+    raises(fileNotFound, readError);
+  void createFile(in string<16> filename, in L4_Word_t size)
+    raises(fileExists, writeError, outOfMemory, outOfFilehandles);
+  void deleteFile(in string<16> filename)
+    raises(fileNotFound, writeError);
+
+
+};
+// vim:sw=2:ts=2:expandtab:
