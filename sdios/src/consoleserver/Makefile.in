@@ -1,5 +1,5 @@
 ##
-## File:  src/io_dsm/Makefile.in
+## File:  src/simplefs/Makefile.in
 ##
 ## Description: Makefile
 ##
@@ -11,16 +11,16 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-PROGRAM= consoleserver	
+PROGRAM= simplefs 
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/sdi/libsdi.a \
 		$(top_srcdir)/include/$(ARCH)/sdi.ld
 
 SRCS=		$(ARCH)-crt0.S \
-		main.cc keyboard.cc
+		main.cc 
 
-IDLS=           keyboard.idl
+IDLS=           filesystem.idl
 
 LIBS+=		-ll4 -lio -lsdi
 LDFLAGS+=	-T $(top_builddir)/include/$(ARCH)/sdi.ld

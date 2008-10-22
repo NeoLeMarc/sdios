@@ -1,0 +1,7 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <iffilesystem.idl>
+
+
+interface filesystem : IF_FILESYSTEM {
+};
