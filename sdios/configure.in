@@ -453,6 +453,7 @@ lib/Makefile
 lib/l4/Makefile
 lib/io/Makefile
 lib/sdi/Makefile
+lib/simplesdi/Makefile
 serv/Makefile
 serv/sigma0/Makefile
 src/Makefile

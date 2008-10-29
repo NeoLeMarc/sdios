@@ -55,7 +55,7 @@ int main () {
 
     // Read a block
     char block[4096];
-    IF_BLOCK_readBlock((CORBA_Object) ramdisk_id, 1, (buffer_t *)block, &env);
+    //IF_BLOCK_readBlock((CORBA_Object) ramdisk_id, 1, (buffer_t *)block, &env);
     printf("** Starting block debug **\n");
     //printf("%s", block);
     printf("\n** End of block debug **\n");

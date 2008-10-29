@@ -61,15 +61,3 @@ ___return_from_main:
 	.space	4*1024
 __stack:   /* this marks the top of the stack */
 
-/* allocate 4*1024 bytes heap space and aditional pointers */
-
-	.data
-	.global __heap_ptr
-__heap_ptr:	
-	.long __heap_start
-	.global __heap_start
-__heap_start:	
-	.space 64*1024
-	.global __heap_end
-__heap_end:
-

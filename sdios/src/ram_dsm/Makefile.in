@@ -14,7 +14,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 PROGRAM= ram_dsm	
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
-		$(top_builddir)/lib/sdi/libsdi.a \
+		$(top_builddir)/lib/simplesdi/libsimplesdi.a \
 		$(top_srcdir)/include/$(ARCH)/sdi.ld
 
 SRCS=		$(ARCH)-crt0.S \
@@ -24,7 +24,7 @@ SRCS=		$(ARCH)-crt0.S \
 
 IDLS=          pager.idl bielfloader.idl
 
-LIBS+=		-ll4 -lio -lsdi
+LIBS+=		-ll4 -lio -lsimplesdi
 LDFLAGS+=	-Ttext=00600000 -T $(top_builddir)/include/$(ARCH)/sdi.ld
 
 CFLAGS_powerpc+=	-fno-builtin

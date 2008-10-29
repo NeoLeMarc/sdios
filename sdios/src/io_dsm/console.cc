@@ -55,6 +55,7 @@ int consoleServer () {
     L4_Sleep(t);
     printf ("[CONSOLE SERVER] Started\n");
 
+#if 0
     write(1, "\n");
 
     L4_Sleep(t);
@@ -66,6 +67,7 @@ int consoleServer () {
     for (int i = 0; i < 105; i++) {
         write(15, "0123456789ABCDEF");
     }
+#endif
 
     printf ("[CONSOLE SERVER] Spinning!\n");
  

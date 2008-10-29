@@ -3269,7 +3269,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files config.mk Makefile if/Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile lib/sdi/Makefile serv/Makefile serv/sigma0/Makefile src/Makefile src/root/Makefile src/ram_dsm/Makefile src/io_dsm/Makefile src/nameserver/Makefile src/taskserver/Makefile src/consoleserver/Makefile src/ramdisk/Makefile src/minix3fs/Makefile src/minix3fs/servers/Makefile src/minix3fs/servers/fs/Makefile src/test/Makefile util/Makefile util/kickstart/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile"
+ac_config_files="$ac_config_files config.mk Makefile if/Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile lib/sdi/Makefile lib/simplesdi/Makefile serv/Makefile serv/sigma0/Makefile src/Makefile src/root/Makefile src/ram_dsm/Makefile src/io_dsm/Makefile src/nameserver/Makefile src/taskserver/Makefile src/consoleserver/Makefile src/ramdisk/Makefile src/minix3fs/Makefile src/test/Makefile util/Makefile util/kickstart/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -3833,6 +3833,7 @@ do
     "lib/l4/Makefile") CONFIG_FILES="$CONFIG_FILES lib/l4/Makefile" ;;
     "lib/io/Makefile") CONFIG_FILES="$CONFIG_FILES lib/io/Makefile" ;;
     "lib/sdi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/sdi/Makefile" ;;
+    "lib/simplesdi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/simplesdi/Makefile" ;;
     "serv/Makefile") CONFIG_FILES="$CONFIG_FILES serv/Makefile" ;;
     "serv/sigma0/Makefile") CONFIG_FILES="$CONFIG_FILES serv/sigma0/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
