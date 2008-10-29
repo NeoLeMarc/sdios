@@ -7,27 +7,29 @@
  * Report bugs to haeberlen@ira.uka.de
  *****************************************************************/
 
+#include <idl4glue.h>
+#include <string.h>
 #include "filesystem.h"
 #include "filesystem-server.h"
 
 typedef struct {
-    L4_Word_t   position; // Position und Größe sollte immer so gewählt werden,
+    L4_Word_t * position; // Position und Größe sollte immer so gewählt werden,
     L4_Word_t   size;     // dass man das ganze in eine Fpage packen kann.
     bool        valid;
     char        name[16];
 } filehandle_t;
 
 // Es gibt bis zu 256 Dateien im System
-filenhandle_t filehandles[MAXFILE + 1];
+filehandle_t filehandles[MAXFILE + 1];
 
 // Unser Heap geht bis 1 GB, d.h. das Dateisystem beginnt
 // bei 1 GB
-beginOfFilesystem = (0x40000000);       // 1 GB
-filesystemPointer = beginOfFilesystem;  // Hier kann die nächste Datei hingelegt werden
+L4_Word_t * beginOfFilesystem = (L4_Word_t *)0x40000000;       // 1 GB
+L4_Word_t * filesystemPointer = beginOfFilesystem;  // Hier kann die nächste Datei hingelegt werden
 
 // **** HILFSFUNKTIONEN *****
 // Liefert den Filehandle zu einem eingegebenen Namen
-int locateFilehandle(char filename[16]){
+int locateFilehandle(char * filename){
     for(int i = 0; i < MAXFILE; i++){
         if(filehandles[i].valid && (strcmp(filehandles[i].name, filename) == 0)){
             return i;
@@ -58,8 +60,8 @@ IDL4_INLINE void filesystem_listFiles_implementation(CORBA_Object _caller, buffe
 
     // 1: Wir müssen uns erstmal Filenames in irgend eine Form bringen, mit
     // der wir arbeiten können.
-    retFilenames = (char [MAXFILE + 1][16])filenames;
-    retPos       = 0;
+    char ** retFilenames = (char **)filenames;
+    int retPos       = 0;
  
     // 2: Kopieren aller Dateinamen von Filehandles, die Valid sind
     for(int i = 0; i < MAXFILE; i++)
@@ -78,19 +80,25 @@ IDL4_INLINE void filesystem_mapFile_implementation(CORBA_Object _caller, const C
     /* implementation of IF_FILESYSTEM::mapFile */
 
     // 1: Filehandle suchen
-    int i = locateFilehandle(filename);
+    int i = locateFilehandle((char *)filename);
 
     if( (i < 0) )
-        raise fileNotFound;
+         CORBA_exception_set(_env, ex_IF_FILESYSTEM_fileNotFound, 0);
 
     // 2: Passende Fpage erzeugen
-    fpage = L4_Fpage(filehandles[i].position, filehandles[i].size);  
+    L4_Fpage_t fpage = L4_Fpage((L4_Word_t)filehandles[i].position, filehandles[i].size);  
 
     // 3: Fpage zurückliefern
-    page = fpage;
+
+    idl4_fpage_set_mode(page, IDL4_MODE_MAP);
+    idl4_fpage_set_page(page, fpage);
+    //idl4_set_base(page, page_end);
+    idl4_fpage_set_permissions(page, IDL4_PERM_FULL);
   
     return;
 }
+
+IDL4_PUBLISH_FILESYSTEM_MAPFILE(filesystem_mapFile_implementation);
 
 IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, const CORBA_char *filename, const L4_Word_t size, idl4_server_environment *_env)
 
@@ -98,29 +106,29 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
     /* implementation of IF_FILESYSTEM::createFile */
     
     // 1: Größe so zurrechtbiegen, dass die Datei später in eine Fpage passt
-    size &= (0xFFFF0000) + (0x1000); // Datei ist immer mindestens 4 kB Groß
+    L4_Word_t mysize = size & ( (0xFFFF0000) + (0x1000) ); // Datei ist immer mindestens 4 kB Groß
    
     // 2. filesystemPointer alignen
-    filesystemPointer &= (0xFFFF0000) + (0x1000);
+    filesystemPointer =  (L4_Word_t *)((L4_Word_t)filesystemPointer & ((0xFFFF0000) + (0x1000)));
 
     // Überprüfen, ob noch genügend Speicher verfügbar ist
-    if( (filesystemPointer + size) >= (0xc0000000) ) 
-        raise outOfMemory;
+    if( ((L4_Word_t)filesystemPointer + mysize) >= (0xc0000000) ) 
+        CORBA_exception_set(_env, ex_IF_FILESYSTEM_outOfMemory, 0);
 
     // 3. Freies Filehandle finden
     int i = locateFreeFilehandle();
 
     if(i < 0)
-        raise outOfFilehandles; // Es wurden keine freien Filehandles gefunden
+        CORBA_exception_set(_env, ex_IF_FILESYSTEM_outOfFilehandles, 0); // Es wurden keine freien Filehandles gefunden
 
     // 4. Filehandle schreiben
     filehandles[i].position = filesystemPointer;
-    filehandles[i].size     = size;
+    filehandles[i].size     = mysize;
     filehandles[i].valid    = 1;
     strcpy(filehandles[i].name, filename);
 
     // 5. filesystemPointer erhöhen
-    filesystemPointer += size;
+    filesystemPointer += mysize;
   
     return;
 }
@@ -133,10 +141,10 @@ IDL4_INLINE void filesystem_deleteFile_implementation(CORBA_Object _caller, cons
     /* implementation of IF_FILESYSTEM::deleteFile */
 
     // 1: Filehandle dieser Datei suchen 
-    int i = locateFilehandle(filename);
+    int i = locateFilehandle((char *)filename);
 
     if(i < 0)
-        raise fileNotFound; // Datei wurde nicht gefunden
+        CORBA_exception_set(_env, ex_IF_FILESYSTEM_fileNotFound, 0); // Datei wurde nicht gefunden
 
     // 2: Datei als gelöscht markieren
     filehandles[i].valid = 0;

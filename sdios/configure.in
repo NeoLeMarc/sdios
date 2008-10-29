@@ -464,9 +464,9 @@ src/nameserver/Makefile
 src/taskserver/Makefile
 src/consoleserver/Makefile
 src/ramdisk/Makefile
+src/simplefs/Makefile
 src/minix3fs/Makefile
 src/test/Makefile
-src/simplefs/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile
