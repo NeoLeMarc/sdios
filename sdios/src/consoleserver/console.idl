@@ -1,0 +1,7 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <ifconsole.idl>
+
+
+interface console : IF_CONSOLE {
+};

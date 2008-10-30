@@ -467,6 +467,7 @@ src/ramdisk/Makefile
 src/simplefs/Makefile
 src/minix3fs/Makefile
 src/test/Makefile
+src/filesystem/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile

@@ -21,9 +21,13 @@
 #include "../lib/io/ia32-port.h"
 #include "keyboard.h"
 
+#include <if/ifconsole.h>
+
 L4_ThreadId_t locatorid; 
 L4_ThreadId_t taskserver_id;
 L4_Word_t   keyboard_stack[1024];
+L4_Word_t   console_stack[1024];
+void console_server();
 
 int main(){
     // Setup CORBA environment
@@ -36,13 +40,19 @@ int main(){
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_TASK_ID, &taskserver_id, &env);
     IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_SYSCALL_ID, &syscall_id, &env);
     
-    // Start the virtual console servers as
-    // new threads
+    
+    // --- Start the console server as new thread ---
+    // Use Taskserver to create a new thread
+    L4_ThreadId_t console_id = IF_TASK_createThread((CORBA_Object) taskserver_id, &env);
 
-    // not implemented
+    // Start thread 
+    L4_Start(console_id, (L4_Word_t)&console_stack[1024], (L4_Word_t)&console_server);
 
-    // Start keyboard server
+    // Announce console server
+    IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_CONSOLE_ID, &console_id, &env);
 
+
+    // --- Start keyboard server ---
     // Use Taskserver to create a new thread
     L4_ThreadId_t keyboard_id = IF_TASK_createThread((CORBA_Object) taskserver_id, &env);
 
@@ -56,5 +66,34 @@ int main(){
     // Announce keyboard server for test client
     IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_KEYBOARD_ID, &keyboard_id, &env);
 
+    
+    // --- Testing ---
+    L4_Time_t t = L4_TimePeriod (1000000);
+    buffer_t* test;
+   
+    printf("[DEBUG] trying to clear the screen\n");
+    IF_CONSOLE_clear((CORBA_Object) console_id, &env);
+    int i = 0;
+    for(i = 0; i < 1; i++){ //wenn hier statt der "1" eine "2" steht -> user touches kernel area - keine Ahnung wieso?
+       printf("test %s\n", test->_buffer);
+    }
+    
+    char* ctest = "Testing Console... printing all available symbols ...\n";
+    test->_buffer = ctest;
+    test->_length = 54;
+    IF_CONSOLE_write((CORBA_Object) console_id, test, &env);
+    test = 0;
+
+    for(i = 0; i < 128; i++){
+       char* symbol;
+       snprintf(symbol, 1, "%c", i);
+       //printf("i=%i, i as char=%c, symbol=%c \n", i, i, *symbol);
+       buffer_t* test;
+       test->_buffer = symbol;
+       test->_length = 1;
+       IF_CONSOLE_write((CORBA_Object) console_id, test, &env);
+       test = 0;
+    }
+    
     while (42);
 }

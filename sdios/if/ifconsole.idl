@@ -1,0 +1,15 @@
+import "sdi/types.h";
+#include <types.idl>
+[uuid(IF_CONSOLE_ID)]
+
+interface IF_CONSOLE{
+  exception VGAMemoryError{};
+
+  void write(in buffer_t input)
+    raises(VGAMemoryError);
+
+  void clear()
+    raises(VGAMemoryError);
+
+};
+// vim:sw=2:ts=2:expandtab:

@@ -70,8 +70,8 @@ int main () {
             }
         }
     }
-    // Explicitly request VGA area
-    requestFpage = L4_Fpage(0xb8000UL, 0x1000UL);
+    // Explicitly request VGA area - now done in Console-Server
+    /*requestFpage = L4_Fpage(0xb8000UL, 0x1000UL);
     printf("[IO-DSM] Requesting fpage: %lx\n", requestFpage.raw);
     if(L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, requestFpage, requestFpage))){
         printf("[IO-DSM] Fpage request failed!\n");
@@ -79,6 +79,7 @@ int main () {
         printf("[IO-DSM] Fpage request succeeded!\n");
     }
     printf("Finished searching for architecture spefic memory!\n");
+    */
 
     // Check for PCI-Bus
     /* 
@@ -128,7 +129,7 @@ int main () {
     printf("... done!%lx\n", status);
 
     // Start console Server
-    consoleServer();
+    // consoleServer();
 
     /* Spin forever */
     while (42);
