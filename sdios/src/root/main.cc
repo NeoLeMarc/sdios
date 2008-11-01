@@ -368,13 +368,21 @@ int main(void) {
     printf("[RT] Taskserver started Ramdisk as %08lx\n", ramdisk_id);
 
     // Use Taskserver to start testclient 
+    /*
     CORBA_char testclientPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
 
     *(L4_Word_t *)testclientPath = 9; // Module 9 == Testclient 
     L4_ThreadId_t testclient_id = IF_TASK_startTask((CORBA_Object) taskserver_id, testclientPath, args, penv, &env);
     printf("[RT] Taskserver started Testclient as %08lx\n", testclient_id);
+    */
 
+    // Use Taskserver to start shell 
+    CORBA_char shellPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+    *(L4_Word_t *)shellPath = 10; // Module 10 == Shell
+    L4_ThreadId_t shell_id = IF_TASK_startTask((CORBA_Object) taskserver_id, shellPath, args, penv, &env);
+    printf("[RT] Taskserver started Shell as %08lx\n", shell_id);
 
 
     // Ask Taskserver to kill IO-DSM
@@ -393,7 +401,7 @@ int main(void) {
     /* There is nothing left to page :( 
      * Unfortunately its not possible to kill the rootthread so we have to idle.
      * WARNING: busy waiting with threads that have different priorities is evil! (starvation) */
-    L4_Time_t t = L4_TimePeriod (1000000);
+    L4_Time_t t = L4_TimePeriod (1000000000);
     while (42) {
         L4_Sleep (t);
     }

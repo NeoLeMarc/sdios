@@ -8,6 +8,9 @@ interface IF_CONSOLE{
   void write(in buffer_t input)
     raises(VGAMemoryError);
 
+  void delete(in int numChars)
+    raises(VGAMemoryError);
+
   void clear()
     raises(VGAMemoryError);
 
