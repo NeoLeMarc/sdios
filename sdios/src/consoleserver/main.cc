@@ -65,37 +65,6 @@ int main(){
 
     // Announce keyboard server for test client
     IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_KEYBOARD_ID, &keyboard_id, &env);
-
-    /*
-    // --- Testing ---
-    L4_Time_t t = L4_TimePeriod (1000000);
-    buffer_t* test;
-   
-    printf("[DEBUG] trying to clear the screen\n");
-    IF_CONSOLE_clear((CORBA_Object) console_id, &env);
-    int i = 0;
-    for(i = 0; i < 1; i++){ //wenn hier statt der "1" eine "2" steht -> user touches kernel area - keine Ahnung wieso?
-       printf("test %s\n", test->_buffer);
-    }
-    */
-
-    /*
-    CORBA_char ctest[60];
-    strncpy(ctest, "Testing Console... printing all available symbols ...\n", 54);
-    test->_buffer = ctest;
-    test->_length = 54;
-    IF_CONSOLE_write((CORBA_Object) console_id, test, &env);
-
-    for(i = 49; i < 128; i++){
-       //char* symbol;
-       //snprintf(symbol, 1, "%c", i);
-       strncpy(ctest, (const char*) i, 1);
-       //printf("i=%i, i as char=%c, symbol=%c \n", i, i, *symbol);
-       test->_buffer = ctest;
-       test->_length = 1;
-       IF_CONSOLE_write((CORBA_Object) console_id, test, &env);
-    }
-    */
     
     
     while (42);

@@ -25,12 +25,12 @@ int consoleCursorHPos = 0, consoleCursorVPos = 24;
 
 /* Interface console */
 
-IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *input, idl4_server_environment *_env)
+IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *input, int length, idl4_server_environment *_env)
 
 {
-  printf("[DEBUG CONSOLE] arguments: length=%i, chars=%s\n", input->_length, input->_buffer);
+  printf("[DEBUG CONSOLE] arguments: length=%i, chars=%s\n", length, input->_buffer);
   /* implementation of IF_CONSOLE::write */
-  for (int pos = 0; pos < input->_length; pos++) {
+  for (int pos = 0; pos < length; pos++) {
     //printf("test %i\n", input->_buffer[pos]);
 	if (consoleCursorHPos == 80 || input->_buffer[pos] == '\n') {
             if (consoleCursorVPos == 24) {
@@ -59,12 +59,12 @@ IDL4_PUBLISH_CONSOLE_WRITE(console_write_implementation);
 IDL4_INLINE void console_delete_implementation(CORBA_Object _caller, const CORBA_long numChars, idl4_server_environment *_env)
 
 {
-  printf("[CONSOLE SERVER] now we should delete n chars...");
+  printf("[CONSOLE SERVER] now we should delete n chars...\n");
   for (int i = 0; i<numChars; i++){
     if (consoleCursorHPos == 0){
         if (consoleCursorVPos != 0){
             consoleCursorVPos--;
-            consoleCursorHPos = 80;
+            consoleCursorHPos = 79;
         }
     } else {
         consoleCursorHPos--;

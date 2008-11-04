@@ -5,7 +5,7 @@ import "sdi/types.h";
 interface IF_CONSOLE{
   exception VGAMemoryError{};
 
-  void write(in buffer_t input)
+  void write(in buffer_t input, in int length)
     raises(VGAMemoryError);
 
   void delete(in int numChars)
