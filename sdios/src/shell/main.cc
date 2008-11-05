@@ -5,6 +5,7 @@
 //
 #include <l4io.h>
 #include <idl4glue.h>
+#include <string.h>
 #include <if/iflocator.h>
 #include <if/ifbielfloader.h>                                                                             
 
@@ -83,7 +84,7 @@ void shell_loop(){
         CORBA_char cleanChars[OUT_BUF_SIZE];
         CORBA_char* cleanPointer = cleanChars;
         bool exCmd = 0;
-        for (int i = 0; i < numchars; i++)
+        for (int i = 0; i < numchars; i++){
             switch (*inPointer++)
             {
                 case KEY_BACKSPACE :    
@@ -121,7 +122,31 @@ void shell_loop(){
         }
 
         if (exCmd){
-               
+
+            // Command parsen
+            int splitPos = strpos(cmdChars, ' ');
+            char command[10];
+
+            // Command kopieren
+            strncpy(command, cmdChars, (splitPos < 9 ? splitPos : 9));
+
+            switch(cmdChars[0]){
+                case 's': // Start
+                    print("!! START !!\n");
+                    break;
+                case 'd': // Download
+                    print("!! DOWNLOAD !!\n");
+                    break;
+                case 'r': // RM
+                    print("!! RM !!\n");
+                    break;
+                case 't': // Touch
+                    print("!! TOUCH !!\n");
+                    break;
+                case 'l': // ls
+                    print("!! LS !!\n");
+                    break;
+            }
         }
         
         printCursor();
@@ -155,7 +180,7 @@ inline void print(char* c){ //ohne inline: user touches kernel area!?
 
 //Handle special Chars like tab, backspace and enter
 char*  handleSpecialChars(char* c){
-   return;
+   return c;
 }
 
 inline void printCursor(){
