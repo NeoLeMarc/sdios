@@ -27,10 +27,6 @@ void printCursor();
 keyboardBuffer kbbuf;
 CORBA_char inChars[OUT_BUF_SIZE];
 
-//Outbuffer
-buffer_t* outbuf;
-CORBA_char outChars[OUT_BUF_SIZE];
-
 //Commandbuffer
 CORBA_char cmdChars[MAX_COMMAND_LENGTH];
 CORBA_char* cmdPointer;
@@ -62,14 +58,13 @@ int main(){
 void shell_loop(){
     L4_Time_t t = L4_TimePeriod (100000);
     
-    outbuf->_maximum = OUT_BUF_SIZE;
-    outbuf->_length = OUT_BUF_SIZE;
-    outbuf->_buffer = outChars;
-    
-    print("Hallo this is your Shell.\n");
+   
+    print("Hello this is your Shell.\n");
     printCursor();
 
     printf("[SHELL] Entering Processing Loop \n");
+
+    
     while(1){
         //Read from Keyboard
         IF_KEYBOARD_read((CORBA_Object) keyboard_id, &kbbuf, &env);
@@ -80,29 +75,31 @@ void shell_loop(){
         // handle special chars
         // if backspace:    delete last char and move inPointer
         // if /n:           
-        CORBA_char* inPointer = inChars;
         CORBA_char cleanChars[OUT_BUF_SIZE];
         CORBA_char* cleanPointer = cleanChars;
         bool exCmd = 0;
         for (int i = 0; i < numchars; i++){
-            switch (*inPointer++)
+            switch (inChars[i])
             {
                 case KEY_BACKSPACE :    
                     numchars--;
                     IF_CONSOLE_delete((CORBA_Object) console_id, 2, &env); //delete 2 chars (cursor + last char)
                     break;
                 case '\n' :
-                    *cleanPointer++ = *inPointer;
-                    *cmdPointer++ = *inPointer;
+                    *cleanPointer++ = inChars[i];
+                    *cmdPointer++   = inChars[i];
                     exCmd = 1;
                     break;
                 case '\t' :
                     
                 default :
-                    *cleanPointer++ = *inPointer;
-                    *cmdPointer++ = *inPointer;
+                    *cleanPointer++ = inChars[i];
+                    *cmdPointer++   = inChars[i];
             }
+            
         }
+
+        *cleanPointer = '\0';
         
         /*
         CORBA_char* inPointer = inChars;
@@ -116,9 +113,9 @@ void shell_loop(){
         
         //Print chars on Screen and put them into the command-buffer
         if(numchars > 0){ // && inPointer == inChars){
-            printf("[SHELL] Printing buffer='%s' on screen. numchars=%i \n", *inPointer, numchars);
+            printf("[SHELL] Printing buffer='%s' on screen. numchars=%i \n", cleanChars, numchars);
             IF_CONSOLE_delete((CORBA_Object) console_id, 1, &env); //delete cursor
-            print (inPointer);
+            print (cleanChars);
         }
 
         if (exCmd){
@@ -148,7 +145,7 @@ void shell_loop(){
                     break;
             }
         }
-        
+   
         printCursor();
 
         //Store chars in buffer until we get a newline
@@ -162,9 +159,21 @@ void shell_loop(){
 
 //Print Chars on the Screen
 inline void print(char* c){ //ohne inline: user touches kernel area!?
+
+    printf("[SHELL] print(): %s\n", c); // Wenn man das entfernt kommt "User touches Kernel Area?!" 
+
+    //Outbuffer
+    buffer_t* outbuf;
+    CORBA_char outChars[OUT_BUF_SIZE];
+
+    outbuf->_maximum = OUT_BUF_SIZE;
+    outbuf->_length = OUT_BUF_SIZE;
+    outbuf->_buffer = outChars;
+ 
     int numChars = strlen(c);
+
     //printf("numChars=%i\n", numChars);
-    char* out = outChars;
+    char * out = outChars;
     int i, k;
     // i mal Buffer mit k Zeichen füllen und senden
     for (i = 0; i < numChars; i += OUT_BUF_SIZE){
@@ -172,9 +181,10 @@ inline void print(char* c){ //ohne inline: user touches kernel area!?
         for (k = 0; k < OUT_BUF_SIZE; k++)
             if ( !( * ( out++ ) = *( c++ ) ) )
                 break;
-        //printf ("test");
+
         IF_CONSOLE_write((CORBA_Object) console_id, outbuf, k, &env);
     }
+
     return;
 }
 
@@ -189,6 +199,3 @@ inline void printCursor(){
     return;
 }
 
-
-
-    
