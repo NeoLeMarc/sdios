@@ -1,4 +1,5 @@
 int strcmp(const char *s1, const char *s2);
+int strpos(char * string, char search);
 //char * strcpy (char *s1, const char *s2);
 
 
@@ -18,3 +19,14 @@ char * strcpy (char *s1, const char *s2) {
     return (res);
 }
 */
+
+// find position of char in string
+int strpos (char * string, char search){
+    int i = 0;
+    while( (*string != '\n') && (*string != '\0'))
+        if(*(string++) == search)
+            return i;
+        else
+            i++;
+    return -1;
+}
