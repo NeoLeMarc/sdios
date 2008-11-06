@@ -20,6 +20,8 @@
 
 #include "../lib/io/ia32-port.h"
 
+#define CURSOR 219
+
 unsigned short * vgaStart = (unsigned short *)0xb8000UL;
 int consoleCursorHPos = 0, consoleCursorVPos = 24;
 
@@ -33,6 +35,8 @@ IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *in
   for (int pos = 0; pos < length; pos++) {
     //printf("test %i\n", input->_buffer[pos]);
 	if (consoleCursorHPos == 80 || input->_buffer[pos] == '\n') {
+            // Delete Cursor
+            *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
             if (consoleCursorVPos == 24) {
                 // Shift whole screen one line up
                 memcpy((void *)vgaStart, (void *)(vgaStart + 80), 3840);
@@ -51,6 +55,8 @@ IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *in
         consoleCursorHPos++;
     }    
   }
+  // Draw Cursor
+  *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = CURSOR;
   return;
 }
 
@@ -59,7 +65,10 @@ IDL4_PUBLISH_CONSOLE_WRITE(console_write_implementation);
 IDL4_INLINE void console_delete_implementation(CORBA_Object _caller, const CORBA_long numChars, idl4_server_environment *_env)
 
 {
-  printf("[CONSOLE SERVER] now we should delete n chars...\n");
+  printf("[CONSOLE SERVER] now we should delete %i chars...\n", numChars);
+  // Delete Cursor
+  *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
+
   for (int i = 0; i<numChars; i++){
     if (consoleCursorHPos == 0){
         if (consoleCursorVPos != 0){
@@ -71,6 +80,9 @@ IDL4_INLINE void console_delete_implementation(CORBA_Object _caller, const CORBA
     }
     *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
   }
+
+  // Draw Cursor
+  *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = CURSOR;
   return;
 }
 
