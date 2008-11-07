@@ -27,6 +27,7 @@ int main(){
     // Setup CORBA environment
     CORBA_Environment env (idl4_default_environment);
     L4_ThreadId_t ram_dsm_id, syscall_id, nilthread = L4_nilthread;
+//    printf("***************************************************************\n");
 
     // Get locator id & Locate Filesystem 
     ram_dsm_id = L4_Pager();       
@@ -37,6 +38,9 @@ int main(){
 
     // Announce Simple-FS Server 
     IF_LOCATOR_Announce((CORBA_Object) locatorid, IF_FILESYSTEM_ID, &myId, &env);
+
+    printf("[SIMPLEFS] Started...\n");
+//    printf("***************************************************************\n");
 
     // Become Filesystem Server
     filesystem_server();

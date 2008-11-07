@@ -359,28 +359,19 @@ int main(void) {
     L4_ThreadId_t consoleserver_id = IF_TASK_startTask((CORBA_Object) taskserver_id, consoleserverPath, args, penv, &env);
     printf("[RT] Taskserver started Consoleserver as %08lx\n", consoleserver_id);
 
-    // Use Taskserver to start ramdisk 
-    CORBA_char ramdiskPath[256]; // We would really like to reuse the above string,
+    // Use Taskserver to start Filesystem 
+    CORBA_char filesystemPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
+    *(L4_Word_t *)filesystemPath = 10; // Module 10 == Shell
+    L4_ThreadId_t filesystem_id = IF_TASK_startTask((CORBA_Object) taskserver_id, filesystemPath, args, penv, &env);
+    printf("[RT] Taskserver started Filesystem as %08lx\n", filesystem_id);
 
-    *(L4_Word_t *)ramdiskPath = 7; // Module 7 == Ramdisk 
-    L4_ThreadId_t ramdisk_id = IF_TASK_startTask((CORBA_Object) taskserver_id, ramdiskPath, args, penv, &env);
-    printf("[RT] Taskserver started Ramdisk as %08lx\n", ramdisk_id);
 
-    // Use Taskserver to start testclient 
-    /*
-    CORBA_char testclientPath[256]; // We would really like to reuse the above string,
-                                    // but IDL4 does something really stupid at this point.
-
-    *(L4_Word_t *)testclientPath = 9; // Module 9 == Testclient 
-    L4_ThreadId_t testclient_id = IF_TASK_startTask((CORBA_Object) taskserver_id, testclientPath, args, penv, &env);
-    printf("[RT] Taskserver started Testclient as %08lx\n", testclient_id);
-    */
 
     // Use Taskserver to start shell 
     CORBA_char shellPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
-    *(L4_Word_t *)shellPath = 10; // Module 10 == Shell
+    *(L4_Word_t *)shellPath = 9; // Module 10 == Shell
     L4_ThreadId_t shell_id = IF_TASK_startTask((CORBA_Object) taskserver_id, shellPath, args, penv, &env);
     printf("[RT] Taskserver started Shell as %08lx\n", shell_id);
 

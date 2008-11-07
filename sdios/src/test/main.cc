@@ -29,7 +29,7 @@ int main () {
     printf("[TESTCLIENT] is alive\n");
     printf("[TESTCLIENT] Beginning system component tests\n");
     printf("*********************************************\n");
-
+/*
     // Give system time to initialize
     L4_Time_t t = L4_TimePeriod (5000000);
     L4_Sleep(t);
@@ -75,6 +75,7 @@ int main () {
             L4_Sleep(t);
 
     }
+    */
     /* Spin forever */
     while (42);
     
