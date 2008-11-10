@@ -136,6 +136,7 @@ void shell_loop(){
                     break;
                 case 'r': // RM
                     print("!! RM !!\n");
+                    IF_FILESYSTEM_deleteFile((CORBA_Object) filesystem_id, "Testdatei1", &env);
                     break;
                 case 't': // Touch
                     print("!! TOUCH !!\n");

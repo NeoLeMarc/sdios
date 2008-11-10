@@ -49,7 +49,9 @@ void dumpFilehandles(){
 
 // Liefert den Filehandle zu einem eingegebenen Namen
 int locateFilehandle(char * filename){
+    printf("[SIMPLE-FS] Entering locate Filehandle...\n");
     for(int i = 0; i < MAXFILE; i++){
+        printf("[SIMPLE-FS] strcmp: %i valid: %i\n", strcmp(filehandles[i].name, filename), filehandles[i].valid); 
         if(filehandles[i].valid && (strcmp(filehandles[i].name, filename) == 0)){
             return i;
         }
@@ -82,6 +84,9 @@ IDL4_INLINE void filesystem_listFiles_implementation(CORBA_Object _caller, buffe
     filenames->_maximum = (MAXFILE + 1) * 16;
     filenames->_length  = (MAXFILE + 1) * 16;
     char * retPos       = (char *)filenames->_buffer; 
+
+    // String komplett säubern:
+    memset(retPos, 0, (MAXFILE + 1) * 16);
  
     // 2: Kopieren aller Dateinamen von Filehandles, die Valid sind
     for(int i = 0; i < MAXFILE; i++)
@@ -105,8 +110,10 @@ IDL4_INLINE void filesystem_mapFile_implementation(CORBA_Object _caller, const C
     // 1: Filehandle suchen
     int i = locateFilehandle((char *)filename);
 
-    if( (i < 0) )
+    if( (i < 0) ){
          CORBA_exception_set(_env, ex_IF_FILESYSTEM_fileNotFound, 0);
+         return;
+    }
 
     // 2: Passende Fpage erzeugen
     L4_Fpage_t fpage = L4_Fpage((L4_Word_t)filehandles[i].position, filehandles[i].size);  
@@ -140,15 +147,26 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
     // 2. filesystemPointer alignen -- Überflüssig, da mysize schon aligned
 //    filesystemPointer =  (L4_Word_t *)((L4_Word_t)filesystemPointer & ((0xFFFF0000) + (0x1000)));
 
+    // überprüfen, ob die Datei bereits existiert
+    if(locateFilehandle((char *)filename) > -1){
+        printf("[SIMPE-FS] ... error: File already exists!\n");
+        CORBA_exception_set(_env, ex_IF_FILESYSTEM_fileExists, 0);
+        return;
+    }
+
     // Überprüfen, ob noch genügend Speicher verfügbar ist
-    if( ((L4_Word_t)filesystemPointer + mysize) >= (0xc0000000) ) 
+    if( ((L4_Word_t)filesystemPointer + mysize) >= (0xc0000000) ){ 
         CORBA_exception_set(_env, ex_IF_FILESYSTEM_outOfMemory, 0);
+        return;
+    }
 
     // 3. Freies Filehandle finden
     int i = locateFreeFilehandle();
 
-    if(i < 0)
+    if(i < 0){
         CORBA_exception_set(_env, ex_IF_FILESYSTEM_outOfFilehandles, 0); // Es wurden keine freien Filehandles gefunden
+        return;
+    }
 
     // 4. Filehandle schreiben
     filehandles[i].position = filesystemPointer;
@@ -177,8 +195,11 @@ IDL4_INLINE void filesystem_deleteFile_implementation(CORBA_Object _caller, cons
     // 1: Filehandle dieser Datei suchen 
     int i = locateFilehandle((char *)filename);
 
-    if(i < 0)
+    if(i < 0){
+        printf("[SIMPE-FS] Error: fileNotFound!\n");
         CORBA_exception_set(_env, ex_IF_FILESYSTEM_fileNotFound, 0); // Datei wurde nicht gefunden
+        return;
+    }
 
     // 2: Datei als gelöscht markieren
     filehandles[i].valid = 0;
