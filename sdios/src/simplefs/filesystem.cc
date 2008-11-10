@@ -132,6 +132,10 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
     
     // 1: Größe so zurrechtbiegen, dass die Datei später in eine Fpage passt
     L4_Word_t mysize = size & (0xFFFFF000);
+    
+    // Wir wollen ja nicht, dass die Dateien zu klein werden...
+    while(mysize < size)
+        mysize *= 2;
    
     // 2. filesystemPointer alignen -- Überflüssig, da mysize schon aligned
 //    filesystemPointer =  (L4_Word_t *)((L4_Word_t)filesystemPointer & ((0xFFFF0000) + (0x1000)));
