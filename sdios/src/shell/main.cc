@@ -11,13 +11,15 @@
 
 #include <if/ifconsole.h>
 #include <if/ifkeyboard.h>
+#include <if/iffilesystem.h>
 
 #define MAX_COMMAND_LENGTH 200
 #define OUT_BUF_SIZE 8
 #define KEY_BACKSPACE 8
+#define MAXFILE       256
 
 CORBA_Environment env (idl4_default_environment);
-L4_ThreadId_t locator_id, keyboard_id, console_id = L4_nilthread; 
+L4_ThreadId_t locator_id, keyboard_id, console_id = L4_nilthread, filesystem_id = L4_nilthread; 
 void shell_loop();
 void print(char*);
 
@@ -28,6 +30,10 @@ CORBA_char outChars[OUT_BUF_SIZE];
 //Inbuffer
 keyboardBuffer kbbuf;
 CORBA_char inChars[OUT_BUF_SIZE];
+
+// Dateibuffer
+buffer_t * filenamebuf;
+CORBA_char filenames[MAXFILE + 1][16];
 
 //Commandbuffer
 CORBA_char cmdChars[MAX_COMMAND_LENGTH];
@@ -46,9 +52,15 @@ int main(){
     while(L4_IsNilThread(keyboard_id))
         IF_LOCATOR_Locate((CORBA_Object) locator_id, IF_KEYBOARD_ID, &keyboard_id, &env);
     printf("[SHELL] thinks that keyboad-server is at %lx \n", keyboard_id);
+
     while(L4_IsNilThread(console_id))
         IF_LOCATOR_Locate((CORBA_Object) locator_id, IF_CONSOLE_ID, &console_id, &env);
     printf("[SHELL] thinks that console-server is at %lx \n", console_id);
+
+    while(L4_IsNilThread(filesystem_id))
+        IF_LOCATOR_Locate((CORBA_Object) locator_id, IF_FILESYSTEM_ID, &filesystem_id, &env);
+    printf("[SHELL] thinks that filesystem-server is at %lx \n", filesystem_id);
+ 
 
     printf("[SHELL] clearing screen \n");
     IF_CONSOLE_clear((CORBA_Object) console_id, &env);
@@ -110,6 +122,7 @@ void shell_loop(){
             // Command parsen
             int splitPos = strpos(cmdChars, ' ');
             char command[10];
+            char * outpointer;                  
 
             // Command kopieren
             strncpy(command, cmdChars, (splitPos < 9 ? splitPos : 9));
@@ -126,15 +139,34 @@ void shell_loop(){
                     break;
                 case 't': // Touch
                     print("!! TOUCH !!\n");
+
+                    // Testweise eine daemliche Datei erstellen
+                    IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, "Testdatei1", 4, &env);
+                    
                     break;
                 case 'l': // ls
-                    print("!! LS !!\n");
+                    // Anzeigen aller Dateien
+                    filenamebuf->_maximum = (MAXFILE + 1) * 16;
+                    filenamebuf->_length  = (MAXFILE + 1) * 16;
+                    filenamebuf->_buffer  = (CORBA_char *)filenames;
+
+                    IF_FILESYSTEM_listFiles((CORBA_Object) filesystem_id, filenamebuf, &env);
+
+                    outpointer = (char *)filenamebuf->_buffer;                  
+                    for(int i = 0; i < MAXFILE; i++){
+                        if(outpointer[0]){
+                            print(outpointer);
+                            print("\n");
+                        }
+                        outpointer += 16;
+                    }
+
                     break;
                 case '?': // list all commands
                     print("Available Shell Commands: start, download, rm, touch, ls\n");
                     break;
                 default :
-                    print("Shell: Command not found\n");
+                    print("Shell-Error: Command not found\n");
             }
             cmdPointer = cmdChars;
         }

@@ -7,6 +7,7 @@
  * Report bugs to haeberlen@ira.uka.de
  *****************************************************************/
 
+#include <l4io.h>
 #include <idl4glue.h>
 #include <string.h>
 #include "filesystem.h"
@@ -28,6 +29,23 @@ L4_Word_t * beginOfFilesystem = (L4_Word_t *)0x40000000;       // 1 GB
 L4_Word_t * filesystemPointer = beginOfFilesystem;  // Hier kann die nächste Datei hingelegt werden
 
 // **** HILFSFUNKTIONEN *****
+// Alle Filehandles initialisieren
+void initFilehandles(){
+    for(int i = 0; i < MAXFILE; i++){
+        filehandles[i].position = 0;
+        filehandles[i].size     = 0;
+        filehandles[i].valid    = 0;
+        filehandles[i].name[0]  = (char)0; 
+    }
+}
+
+// Alle Filehandles anzeigen, fuer Debugging
+void dumpFilehandles(){
+    for(int i = 0; i < MAXFILE; i++)
+        printf("P: %i S: %i V: %i N: %s\n", filehandles[i].position, filehandles[i].size, \
+                                            filehandles[i].valid, filehandles[i].name);
+}
+
 // Liefert den Filehandle zu einem eingegebenen Namen
 int locateFilehandle(char * filename){
     for(int i = 0; i < MAXFILE; i++){
@@ -60,13 +78,17 @@ IDL4_INLINE void filesystem_listFiles_implementation(CORBA_Object _caller, buffe
 
     // 1: Wir müssen uns erstmal Filenames in irgend eine Form bringen, mit
     // der wir arbeiten können.
-    char ** retFilenames = (char **)filenames;
-    int retPos       = 0;
+    filenames->_maximum = (MAXFILE + 1) * 16;
+    filenames->_length  = (MAXFILE + 1) * 16;
+    char * retPos       = (char *)filenames->_buffer; 
  
     // 2: Kopieren aller Dateinamen von Filehandles, die Valid sind
     for(int i = 0; i < MAXFILE; i++)
-        if(filehandles[i].valid)
-            strcpy(retFilenames[retPos++], filehandles[i].name);
+        if(filehandles[i].valid == 1){
+            strncpy(retPos, filehandles[i].name, 15);
+            memset(retPos + 15, 0, 1);
+            retPos += 16;
+        }
 
     return;
 }
@@ -104,6 +126,8 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
 
 {
     /* implementation of IF_FILESYSTEM::createFile */
+
+    printf("[SIMPLE-FS] Trying to create file '%s'... ", filename);
     
     // 1: Größe so zurrechtbiegen, dass die Datei später in eine Fpage passt
     L4_Word_t mysize = size & ( (0xFFFF0000) + (0x1000) ); // Datei ist immer mindestens 4 kB Groß
@@ -125,11 +149,15 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
     filehandles[i].position = filesystemPointer;
     filehandles[i].size     = mysize;
     filehandles[i].valid    = 1;
-    strcpy(filehandles[i].name, filename);
+    strncpy(filehandles[i].name, filename, 16);
 
     // 5. filesystemPointer erhöhen
     filesystemPointer += mysize;
-  
+
+    printf("... created at position %i!\n", i);
+
+    // dumpFilehandles();
+
     return;
 }
 
@@ -165,6 +193,9 @@ void filesystem_server(void)
   L4_MsgTag_t msgtag;
   idl4_msgbuf_t msgbuf;
   long cnt;
+
+  // initialize Filehandles
+  initFilehandles();
 
   idl4_msgbuf_init(&msgbuf);
   for (cnt = 0;cnt < FILESYSTEM_STRBUF_SIZE;cnt++)

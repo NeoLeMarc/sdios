@@ -5,4 +5,10 @@
 /config.mk.in/1.8.4.4/Wed Jun  2 12:18:24 2004//
 /configure.in/1.18.2.23/Mon Mar 21 01:15:15 2005//
 /install-sh/1.1/Fri Jan 31 00:47:04 2003//
-D
+D/Mk////
+D/apps////
+D/contrib////
+D/include////
+D/lib////
+D/serv////
+D/util////
