@@ -42,8 +42,9 @@ void initFilehandles(){
 // Alle Filehandles anzeigen, fuer Debugging
 void dumpFilehandles(){
     for(int i = 0; i < MAXFILE; i++)
-        printf("P: %i S: %i V: %i N: %s\n", filehandles[i].position, filehandles[i].size, \
-                                            filehandles[i].valid, filehandles[i].name);
+        if(filehandles[i].valid)
+            printf("P: %i S: %i V: %i N: %s\n", filehandles[i].position, filehandles[i].size, \
+                                                filehandles[i].valid, filehandles[i].name);
 }
 
 // Liefert den Filehandle zu einem eingegebenen Namen
@@ -127,13 +128,13 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
 {
     /* implementation of IF_FILESYSTEM::createFile */
 
-    printf("[SIMPLE-FS] Trying to create file '%s'... ", filename);
+    printf("[SIMPLE-FS] Trying to create file '%s' of size %i... ", filename, size);
     
     // 1: Größe so zurrechtbiegen, dass die Datei später in eine Fpage passt
-    L4_Word_t mysize = size & ( (0xFFFF0000) + (0x1000) ); // Datei ist immer mindestens 4 kB Groß
+    L4_Word_t mysize = size & (0xFFFFF000);
    
-    // 2. filesystemPointer alignen
-    filesystemPointer =  (L4_Word_t *)((L4_Word_t)filesystemPointer & ((0xFFFF0000) + (0x1000)));
+    // 2. filesystemPointer alignen -- Überflüssig, da mysize schon aligned
+//    filesystemPointer =  (L4_Word_t *)((L4_Word_t)filesystemPointer & ((0xFFFF0000) + (0x1000)));
 
     // Überprüfen, ob noch genügend Speicher verfügbar ist
     if( ((L4_Word_t)filesystemPointer + mysize) >= (0xc0000000) ) 
@@ -152,11 +153,12 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
     strncpy(filehandles[i].name, filename, 16);
 
     // 5. filesystemPointer erhöhen
-    filesystemPointer += mysize;
+    filesystemPointer += mysize / 4; // Durch 4, da Seiten.
 
     printf("... created at position %i!\n", i);
+    printf("Filesystem pointer incremented by %lx\n", mysize);
 
-    // dumpFilehandles();
+    dumpFilehandles();
 
     return;
 }

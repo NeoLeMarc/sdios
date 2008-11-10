@@ -141,7 +141,7 @@ void shell_loop(){
                     print("!! TOUCH !!\n");
 
                     // Testweise eine daemliche Datei erstellen
-                    IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, "Testdatei1", 4, &env);
+                    IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, "Testdatei1", 9000, &env);
                     
                     break;
                 case 'l': // ls
