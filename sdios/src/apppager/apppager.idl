@@ -1,0 +1,7 @@
+import "sdi/types.h";
+#include <types.idl>
+#include <ifpagefault.idl>
+#include <ifapppager.idl>
+
+interface apppager : IF_PAGEFAULT,IF_APPPAGER {
+};

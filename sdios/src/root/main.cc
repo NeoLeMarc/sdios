@@ -375,6 +375,12 @@ int main(void) {
     L4_ThreadId_t shell_id = IF_TASK_startTask((CORBA_Object) taskserver_id, shellPath, args, penv, &env);
     printf("[RT] Taskserver started Shell as %08lx\n", shell_id);
 
+    // Use Taskserver to start app-pager
+    CORBA_char apppagerPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+    *(L4_Word_t *)apppagerPath = 10; // Module 10 == Shell
+    L4_ThreadId_t apppager_id = IF_TASK_startTask((CORBA_Object) taskserver_id, apppagerPath, args, penv, &env);
+    printf("[RT] Taskserver started Apppager as %08lx\n", apppager_id);
 
     // Ask Taskserver to kill IO-DSM
 //    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);

@@ -468,6 +468,7 @@ src/simplefs/Makefile
 src/minix3fs/Makefile
 src/test/Makefile
 src/shell/Makefile
+src/apppager/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/piggybacker/Makefile

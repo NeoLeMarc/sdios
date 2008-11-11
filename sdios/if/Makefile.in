@@ -12,6 +12,6 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 IDLS=		types.idl \
-		iflogging.idl iflocator.idl ifsyscall.idl ifpagefault.idl ifbielfloader.idl iftask.idl ifkeyboard.idl ifinterrupt.idl ifblock.idl iffilesystem.idl ifconsole.idl
+		iflogging.idl iflocator.idl ifsyscall.idl ifpagefault.idl ifbielfloader.idl iftask.idl ifkeyboard.idl ifinterrupt.idl ifblock.idl iffilesystem.idl ifconsole.idl ifapppager.idl
 
 include $(top_srcdir)/Mk/sdi.idl.mk

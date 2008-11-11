@@ -13,7 +13,8 @@
 #if !defined(__INCLUDE__NEW_H__)
 #define __INCLUDE__NEW_H__
 
-#include <types.h>
+//#include <types.h>
+#include <sdi/sdi.h>
 #include <stdlib.h>
 // Very, very simple new and delete
 // C++-Standart say, that new never returns 0, but throws an exeption
@@ -21,14 +22,14 @@
 
 extern inline void * operator new      (size_t size)
 	{
-		void* foo=malloc(size);
+		void* foo=alloc(size);
 		if (!foo) L4_KDB_Enter("new: Out if memory");
 		return foo;
 	}
 
 extern inline void * operator new[]    (size_t size)
 	{
-		void* foo=malloc(size);
+		void* foo=alloc(size);
 		if (!foo) L4_KDB_Enter("new: Out if memory");
 		return foo;
 	}
