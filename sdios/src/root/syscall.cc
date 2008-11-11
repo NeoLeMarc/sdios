@@ -18,41 +18,37 @@ IDL4_INLINE void syscall_ThreadControl_implementation(CORBA_Object _caller, cons
 {
   /* implementation of IF_SYSCALL::ThreadControl */
 
-  printf("[SYSCALLSERVER]: ThreadControl called ");
   L4_Word_t result = L4_ThreadControl(*dest, *SpaceSpecifier, *scheduler, *pager, (void *)UtcbLocation);
   if (result == 0) {
-    printf("and failed ");
     switch (L4_ErrorCode()) {
       case L4_ErrNoPrivilege:
-        printf("due to insufficient privileges.\n");
+        printf("[SYSCALL] ThreadControl failed due to insufficient privileges.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_noPrivilege, 0);
         break;
       case L4_ErrInvalidThread:
-        printf("due to an invalid thread to be changed.\n");
+        printf("[SYSCALL] ThreadControl failed due to an invalid thread to be changed.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidThread, 0);
         break;
       case L4_ErrInvalidSpace:
-        printf("due to an invalid AS mate thread.\n");
+        printf("[SYSCALL] ThreadControl failed due to an invalid AS mate thread.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidSpace, 0);
         break;
       case L4_ErrInvalidScheduler:
-        printf("due to an invalid scheduler thread.\n");
+        printf("[SYSCALL] ThreadControl failed due to an invalid scheduler thread.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidScheduler, 0);
         break;
       case L4_ErrUtcbArea:
-        printf("due to an invalid UTCB location.\n");
+        printf("[SYSCALL] ThreadControl failed due to an invalid UTCB location.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidUtcbLocation, 0);
         break;
       case L4_ErrNoMem:
-        printf("due to insufficient memory.\n");
+        printf("[SYSCALL] ThreadControl failed due to insufficient memory.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_outOfMemory, 0);
         break;
       default:
-        printf("due to an unknown error. PAAAAANIC!\n");
-        panic("L4 API violation.\n");
+        printf("[SYSCALL] ThreadControl failed due to an unknown error.\n");
+        panic("L4 API violation. Guru meditation.");
     }
-  } else {
-    printf("successfully.\n");
   }
   
   return;
@@ -65,33 +61,31 @@ IDL4_INLINE void syscall_SpaceControl_implementation(CORBA_Object _caller, const
 {
   /* implementation of IF_SYSCALL::SpaceControl */
 
-  printf("[SYSCALLSERVER]: SpaceControl called ");
+  printf("[SYSCALL] SpaceControl failed ");
   L4_Word_t result = L4_SpaceControl(*SpaceSpecifier, control, *KernelInterfacePageArea, *UtcbArea, *Redirector, old_Control);
   if (result == 0) {
     printf("and failed ");
     switch (L4_ErrorCode()) {
       case L4_ErrNoPrivilege:
-        printf("due to insufficient privileges.\n");
+        printf("[SYSCALL] SpaceControl failed due to insufficient privileges.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_noPrivilege, 0);
         break;
       case L4_ErrInvalidSpace:
-        printf("due to an invalid AS mate thread.\n");
+        printf("[SYSCALL] SpaceControl failed due to an invalid AS mate thread.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidSpace, 0);
         break;
       case L4_ErrUtcbArea:
-        printf("due to an invalid UTCB area definition.\n");
+        printf("[SYSCALL] SpaceControl failed due to an invalid UTCB area definition.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidUtcbLocation, 0);
         break;
       case L4_ErrKipArea:
-        printf("due to an invalid KIP area definition.\n");
+        printf("[SYSCALL] SpaceControl failed due to an invalid KIP area definition.\n");
         CORBA_exception_set(_env, ex_IF_SYSCALL_invalidKipArea, 0);
         break;
       default:
-        printf("due to an unknown error. PAAAAANIC!\n");
-        panic("L4 API violation.\n");
+        printf("[SYSCALL] SpaceControl failed due to an unknown error.\n");
+        panic("L4 API violation. Guru meditation.");
     }
-  } else {
-    printf("successfully.\n");
   }
  
   
