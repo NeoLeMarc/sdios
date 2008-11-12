@@ -227,9 +227,12 @@ char * keycodeToChars(unsigned char scancode, char * buf) {
                 // select respective char string
                 current += scancode * MAX_CHAR_LEN;
                 // copy char string into buffer
-                int maxchars = MAX_CHAR_LEN;
-                while ((maxchars-- > 0) && !( *(buf++) = *(current++) ))
-                    ;
+                for (int maxchars = MAX_CHAR_LEN; maxchars > 0; maxchars--) {
+                    if (!(*(buf++) = *(current++))) {
+                        buf--;
+                        break;
+                    }
+                }
             }
     }
     // terminate string and return new buffer position

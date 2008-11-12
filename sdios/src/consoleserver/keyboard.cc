@@ -74,7 +74,7 @@ IDL4_INLINE void keyboard_interrupt_implementation(CORBA_Object _caller, idl4_se
 {
   /* implementation of IF_INTERRUPT::interrupt */
 
-  L4_Word_t kbreg=0x60, ctrlreg=0x64;
+  const L4_Word_t kbreg=0x60, ctrlreg=0x64;
   L4_Word8_t scancode = 0, status = 0, ledstatus = 0;
   extern modifiers_t modifiers;
 
