@@ -1,8 +1,14 @@
 // for main.cc to be able to call taskserver.cc
 void taskserver_server(void);
 
+enum pagedby_e {
+    pagedbyBiElfLoader,
+    pagedbyAppPager
+};
+
 typedef struct {
     L4_Fpage_t utcbarea;
+    pagedby_e pagedby;
     struct thread * firstThread;
 } as_t;
 

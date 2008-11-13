@@ -10,7 +10,9 @@
 #include <l4io.h>
 #include <idl4glue.h>
 #include <if/ifsyscall.h>
+#include <if/iflocator.h>
 #include <if/ifbielfloader.h>
+#include <if/ifapppager.h>
 #include "taskserver-server.h"
 #include "taskserver.h"
 
@@ -18,6 +20,7 @@
 extern L4_ThreadId_t ram_dsm_id;
 extern L4_ThreadId_t locatorid;
 extern L4_ThreadId_t syscallid;
+L4_ThreadId_t apppagerid = L4_nilthread;
 
 // Thread ID Management
 L4_Word_t next_thread_no = L4_ThreadNo(L4_Myself()) + 1; 
@@ -146,6 +149,15 @@ inline L4_ThreadId_t get_free_threadid() {
     return L4_GlobalId(next_thread_no++, 1);
 }
 
+inline L4_ThreadId_t get_apppager() {
+    while (L4_IsNilThread(apppagerid)) {
+        // Setup corba environment
+        CORBA_Environment env (idl4_default_environment);
+        IF_LOCATOR_Locate((CORBA_Object) locatorid, IF_APPPAGER_ID, &apppagerid, &env);
+    }
+    return apppagerid;
+}
+
 /* Interface taskserver */
 
 IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _caller, const CORBA_char *path, const CORBA_char *args, const CORBA_char *task_env, idl4_server_environment *_env)
@@ -176,20 +188,33 @@ IDL4_INLINE L4_ThreadId_t taskserver_startTask_implementation(CORBA_Object _call
   space->utcbarea = utcbarea;
   thread->localid.raw = L4_Address(utcbarea);
 
-  // 1. Ask syscall server to do ThreadControl to setup initial thread
+  // Ask syscall server to do ThreadControl to setup initial thread
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &myself, &nilthread, -1UL, &env);
 
-  // 2. Ask syscall server to do SpaceControl to setup address space
+  // Ask syscall server to do SpaceControl to setup address space
   L4_Word_t dummy; // Takes result
   IF_SYSCALL_SpaceControl((CORBA_Object)syscallid, &threadId, 0, &kiparea, &utcbarea, &anythread, &dummy, &env);
   
-  // 3. Ask syscall server to do second ThreadControl to activate thread
-  IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &nilthread, &ram_dsm_id, thread->localid.raw, &env);
-  
+  // Determine whether to ask RAM-DSM/BIElfLoader or AppPager
+  if (*reinterpret_cast<const L4_Word8_t*>(path) != 0x2f) { // 0x2f is the code for "/"
+      space->pagedby = pagedbyBiElfLoader;
 
-  // 4. Ask BIELFLOADER to associate image
-  L4_Word_t moduleId = *path;
-  IF_BIELFLOADER_associateImage((CORBA_Object)ram_dsm_id, &threadId, moduleId, &dummy, &env);
+      // Ask syscall server to do second ThreadControl to activate thread
+      IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &nilthread, &ram_dsm_id, thread->localid.raw, &env);
+      
+      // Ask BIELFLOADER to associate image
+      L4_Word_t moduleId = *path;
+      IF_BIELFLOADER_associateImage((CORBA_Object)ram_dsm_id, &threadId, moduleId, &dummy, &env);
+  } else {
+      space->pagedby = pagedbyAppPager;
+      
+      // Ask syscall server to do second ThreadControl to activate thread
+      L4_ThreadId_t pagerid = get_apppager();
+      IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &threadId, &threadId, &nilthread, &pagerid, thread->localid.raw, &env);
+      
+      // Ask AppPager to associate image
+      IF_APPPAGER_associateImage((CORBA_Object)pagerid, &threadId, path + 1, &dummy, &env);
+  }
  
   return threadId;
 }
@@ -211,6 +236,10 @@ IDL4_INLINE void taskserver_kill_implementation(CORBA_Object _caller, const L4_T
   // Ask syscall server to do terminate thread 
   L4_ThreadId_t nilthread = L4_nilthread;
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, thread, &nilthread, &nilthread, &nilthread, -1UL, &env);
+
+  // Notify Apppager if paged by it
+  if (tcb->as->pagedby == pagedbyAppPager) 
+    IF_APPPAGER_deleteAssociation((CORBA_Object)get_apppager(), thread, &env);
 
   // Notify all waiting threads
   listener_t * cur = tcb->firstListener;
@@ -283,7 +312,10 @@ IDL4_INLINE L4_ThreadId_t taskserver_createThread_implementation(CORBA_Object _c
   /* implementation of IF_TASK::createThread */
 
   IF_SYSCALL_ThreadControl((CORBA_Object)syscallid, &newthreadid, (L4_ThreadId_t*)&_caller, &myself, &ram_dsm_id, newthread->localid.raw, &env);
-  IF_BIELFLOADER_copyAssociation((CORBA_Object)ram_dsm_id, &(caller->globalid), &newthreadid, &env);
+  if (space->pagedby == pagedbyBiElfLoader) 
+    IF_BIELFLOADER_copyAssociation((CORBA_Object)ram_dsm_id, &(caller->globalid), &newthreadid, &env);
+  else if (space->pagedby == pagedbyAppPager)
+    IF_APPPAGER_copyAssociation((CORBA_Object)get_apppager(), &(caller->globalid), &newthreadid, &env);
   
   return newthreadid;
 }
