@@ -1,0 +1,22 @@
+default 0
+timeout 0
+
+title SdiOS
+root (nd)
+
+kernel /kickstart
+module /ia32-kernel
+module /sigma0
+module /root
+module /io_dsm
+module /ram_dsm
+module /nameserver
+module /taskserver
+module /consoleserver
+module /simplefs
+module /apppager
+module /shell
+
+# module /ramdisk
+# module /filesystem.ram
+# module /test

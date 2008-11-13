@@ -341,7 +341,7 @@ int main(void) {
   
     *(L4_Word_t *)taskserverPath = 2; // Module 2 == IO-DSM
     L4_ThreadId_t io_dsm_id = IF_TASK_startTask((CORBA_Object) taskserver_id, taskserverPath, args, penv, &env);
-    printf("[RT] Taskserver started IO-DSM as %08lx\n", io_dsm_id);
+    printf("[RT] Taskserver started IO-DSM as %08lx\n", io_dsm_id.raw);
 
     // Use Taskserver to start Nameserver
     CORBA_char nameserverPath[256]; // We would really like to reuse the above string,
@@ -349,7 +349,7 @@ int main(void) {
 
     *(L4_Word_t *)nameserverPath = 4; // Module 4 == Nameserver 
     L4_ThreadId_t nameserver_id = IF_TASK_startTask((CORBA_Object) taskserver_id, nameserverPath, args, penv, &env);
-    printf("[RT] Taskserver started Nameserver as %08lx\n", nameserver_id);
+    printf("[RT] Taskserver started Nameserver as %08lx\n", nameserver_id.raw);
 
     // Use Taskserver to start Consoleserver
     CORBA_char consoleserverPath[256]; // We would really like to reuse the above string,
@@ -357,30 +357,28 @@ int main(void) {
 
     *(L4_Word_t *)consoleserverPath = 6; // Module 6 == Consoleserver 
     L4_ThreadId_t consoleserver_id = IF_TASK_startTask((CORBA_Object) taskserver_id, consoleserverPath, args, penv, &env);
-    printf("[RT] Taskserver started Consoleserver as %08lx\n", consoleserver_id);
+    printf("[RT] Taskserver started Consoleserver as %08lx\n", consoleserver_id.raw);
 
     // Use Taskserver to start Filesystem 
     CORBA_char filesystemPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
-    *(L4_Word_t *)filesystemPath = 10; // Module 10 == Shell
+    *(L4_Word_t *)filesystemPath = 7; // Module 7 == simplefs
     L4_ThreadId_t filesystem_id = IF_TASK_startTask((CORBA_Object) taskserver_id, filesystemPath, args, penv, &env);
-    printf("[RT] Taskserver started Filesystem as %08lx\n", filesystem_id);
-
-
-
-    // Use Taskserver to start shell 
-    CORBA_char shellPath[256]; // We would really like to reuse the above string,
-                                    // but IDL4 does something really stupid at this point.
-    *(L4_Word_t *)shellPath = 9; // Module 10 == Shell
-    L4_ThreadId_t shell_id = IF_TASK_startTask((CORBA_Object) taskserver_id, shellPath, args, penv, &env);
-    printf("[RT] Taskserver started Shell as %08lx\n", shell_id);
+    printf("[RT] Taskserver started Filesystem as %08lx\n", filesystem_id.raw);
 
     // Use Taskserver to start app-pager
     CORBA_char apppagerPath[256]; // We would really like to reuse the above string,
                                     // but IDL4 does something really stupid at this point.
-    *(L4_Word_t *)apppagerPath = 10; // Module 10 == Shell
+    *(L4_Word_t *)apppagerPath = 8; // Module 8 == application pager
     L4_ThreadId_t apppager_id = IF_TASK_startTask((CORBA_Object) taskserver_id, apppagerPath, args, penv, &env);
-    printf("[RT] Taskserver started Apppager as %08lx\n", apppager_id);
+    printf("[RT] Taskserver started Apppager as %08lx\n", apppager_id.raw);
+
+    // Use Taskserver to start shell 
+    CORBA_char shellPath[256]; // We would really like to reuse the above string,
+                                    // but IDL4 does something really stupid at this point.
+    *(L4_Word_t *)shellPath = 9; // Module 9 == shell
+    L4_ThreadId_t shell_id = IF_TASK_startTask((CORBA_Object) taskserver_id, shellPath, args, penv, &env);
+    printf("[RT] Taskserver started Shell as %08lx\n", shell_id.raw);
 
     // Ask Taskserver to kill IO-DSM
 //    IF_TASK_kill((CORBA_Object) taskserver_id, &io_dsm_id, &env);
