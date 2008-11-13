@@ -61,10 +61,8 @@ IDL4_INLINE void syscall_SpaceControl_implementation(CORBA_Object _caller, const
 {
   /* implementation of IF_SYSCALL::SpaceControl */
 
-  printf("[SYSCALL] SpaceControl failed ");
   L4_Word_t result = L4_SpaceControl(*SpaceSpecifier, control, *KernelInterfacePageArea, *UtcbArea, *Redirector, old_Control);
   if (result == 0) {
-    printf("and failed ");
     switch (L4_ErrorCode()) {
       case L4_ErrNoPrivilege:
         printf("[SYSCALL] SpaceControl failed due to insufficient privileges.\n");
