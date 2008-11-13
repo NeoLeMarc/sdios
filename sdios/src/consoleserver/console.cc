@@ -23,7 +23,18 @@
 #define CURSOR 219
 
 unsigned short * vgaStart = (unsigned short *)0xb8000UL;
-int consoleCursorHPos = 0, consoleCursorVPos = 24;
+unsigned int consoleCursorHPos = 0, consoleCursorVPos = 24;
+L4_Word16_t crtcAddrReg, crtcDataReg;
+
+inline void drawCursor() {
+  // see http://www.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/textcur.htm
+  const L4_Word8_t curhighreg = 0x0e, curlowreg = 0x0f;
+  L4_Word16_t curaddr = 80*consoleCursorVPos + consoleCursorHPos;
+  outb(crtcAddrReg, curhighreg);
+  outb(crtcDataReg, curaddr >> 8);
+  outb(crtcAddrReg, curlowreg);
+  outb(crtcDataReg, curaddr & 0xff);
+}
 
 /* Interface console */
 
@@ -35,8 +46,6 @@ IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *in
   for (int pos = 0; pos < length; pos++) {
     //printf("test %i\n", input->_buffer[pos]);
 	if (consoleCursorHPos == 80 || input->_buffer[pos] == '\n') {
-            // Delete Cursor
-            *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
             if (consoleCursorVPos == 24) {
                 // Shift whole screen one line up
                 memcpy((void *)vgaStart, (void *)(vgaStart + 80), 3840);
@@ -55,8 +64,7 @@ IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *in
         consoleCursorHPos++;
     }    
   }
-  // Draw Cursor
-  *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = CURSOR;
+  drawCursor();
   return;
 }
 
@@ -81,8 +89,7 @@ IDL4_INLINE void console_delete_implementation(CORBA_Object _caller, const CORBA
     *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
   }
 
-  // Draw Cursor
-  *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = CURSOR;
+  drawCursor();
   return;
 }
 
@@ -120,6 +127,27 @@ void console_server(void)
      printf("[CONSOLE SERVER] Fpage request succeeded!\n");
   }
 
+  // Enable text mode cursor
+  // see http://www.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/extreg.htm
+  const L4_Word16_t vgaMiscOutReg = 0x3cc; 
+  if (inb(vgaMiscOutReg) & 1) {
+    crtcAddrReg = 0x3d4;
+    crtcDataReg = 0x3d5;
+  } else {
+    crtcAddrReg = 0x3b4;
+    crtcDataReg = 0x3b5;
+  }  
+
+  // see http://www.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/textcur.htm
+  const L4_Word8_t maxscanreg = 0x09, curstartreg = 0x0a, curendreg = 0x0b;
+  outb(crtcAddrReg, maxscanreg);
+  L4_Word8_t maxscan = inb(crtcDataReg) & 0x1f;
+  printf("[CS] maxscan = %x\n", maxscan);
+  outb(crtcAddrReg, curstartreg);
+  outb(crtcDataReg, maxscan - 2);
+  outb(crtcAddrReg, curendreg);
+  outb(crtcDataReg, maxscan);
+  
   /*
   L4_Time_t t = L4_TimePeriod (500000);
   L4_Sleep(t);
