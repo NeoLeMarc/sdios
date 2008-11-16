@@ -22,6 +22,7 @@ CORBA_Environment env (idl4_default_environment);
 L4_ThreadId_t locator_id, keyboard_id, console_id = L4_nilthread, filesystem_id = L4_nilthread; 
 void shell_loop();
 void print(char*);
+void printPromt();
 
 //Outbuffer
 buffer_t* outbuf;
@@ -74,6 +75,7 @@ void shell_loop(){
     cmdPointer = cmdChars;
     
     print("Hello this is your Shell. Type \"?\" to see a list of available commands.\n");
+    printPromt();
     printf("[SHELL] Entering Processing Loop \n");
     while(1){
         //Read from Keyboard
@@ -93,12 +95,16 @@ void shell_loop(){
             switch (inChars[i])
             {
                 case KEY_BACKSPACE :    
-                    numchars--;
-                    IF_CONSOLE_delete((CORBA_Object) console_id, 1, &env); //delete 2 chars (cursor + last char)
+                    if (cmdPointer > cmdChars){ 
+                        cmdPointer--;
+                        numchars--;
+                        IF_CONSOLE_delete((CORBA_Object) console_id, 1, &env);
+                    }
                     break;
                 case '\n' :
                     *cleanPointer++ = inChars[i];
                     *cmdPointer++   = inChars[i];
+                    *cmdPointer++   = '\0';
                     exCmd = 1;
                     break;
                 case '\t' :
@@ -121,11 +127,17 @@ void shell_loop(){
 
             // Command parsen
             int splitPos = strpos(cmdChars, ' ');
+            int argLen = strlen(cmdChars) - splitPos - 2;
             char command[10];
+            char argument[10];
             char * outpointer;                  
 
             // Command kopieren
             strncpy(command, cmdChars, (splitPos < 9 ? splitPos : 9));
+            // Argument kopieren
+            strncpy(argument, &cmdChars[splitPos + 1], (argLen < 9 ? argLen : 9));
+            argument[(argLen < 9 ? argLen : 9)] = '\0';
+            //printf("splitPos: %i, cmdLen: %i, argLen: %i, argument: %s", splitPos, strlen(cmdChars)-1, argLen, argument);
 
             switch(cmdChars[0]){
                 case 's': // Start
@@ -136,13 +148,13 @@ void shell_loop(){
                     break;
                 case 'r': // RM
                     print("!! RM !!\n");
-                    IF_FILESYSTEM_deleteFile((CORBA_Object) filesystem_id, "Testdatei1", &env);
+                    IF_FILESYSTEM_deleteFile((CORBA_Object) filesystem_id, argument, &env);
                     break;
                 case 't': // Touch
                     print("!! TOUCH !!\n");
 
                     // Testweise eine daemliche Datei erstellen
-                    IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, "Testdatei1", 9000, &env);
+                    IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, argument, 9000, &env);
                     
                     break;
                 case 'l': // ls
@@ -164,12 +176,13 @@ void shell_loop(){
 
                     break;
                 case '?': // list all commands
-                    print("Available Shell Commands: start, download, rm, touch, ls\n");
+                    print("Available Shell Commands: start, download, rm $filename, touch $filename, ls\n");
                     break;
                 default :
                     print("Shell-Error: Command not found\n");
             }
             cmdPointer = cmdChars;
+            printPromt();
         }
    
         if (!kbbuf.more)
@@ -203,5 +216,10 @@ void print(char* c){ //ohne inline: user touches kernel area!?
 
         IF_CONSOLE_write((CORBA_Object) console_id, outbuf, k, &env);
     }
+    return;
+}
+
+inline void printPromt(){
+    print("# ");
     return;
 }
