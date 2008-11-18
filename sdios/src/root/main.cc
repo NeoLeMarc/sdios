@@ -336,12 +336,8 @@ int main(void) {
     activate_module(taskserver_id, 5);
     printf ("[RT] Registered Taskserver\n");
 
-    // Use Taskserver to start IO-DSM
+    // Use Taskserver to start following Tasks
     CORBA_char taskserverPath[256], args[3], penv[3];
-  
-    *(L4_Word_t *)taskserverPath = 2; // Module 2 == IO-DSM
-    L4_ThreadId_t io_dsm_id = IF_TASK_startTask((CORBA_Object) taskserver_id, taskserverPath, args, penv, &env);
-    printf("[RT] Taskserver started IO-DSM as %08lx\n", io_dsm_id.raw);
 
     // Use Taskserver to start Nameserver
     CORBA_char nameserverPath[256]; // We would really like to reuse the above string,

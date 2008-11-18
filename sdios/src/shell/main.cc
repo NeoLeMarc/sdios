@@ -74,7 +74,16 @@ void shell_loop(){
     L4_Time_t t = L4_TimePeriod (100000);
     cmdPointer = cmdChars;
     
-    print("Hello this is your Shell. Type \"?\" to see a list of available commands.\n");
+    print("sdiOS/06 v0.1\n\n");
+    print("System architecture Group\n");
+    print("Universitaet Karlsruhe (TH)\n");
+    print("Forschungsuniversitaet - gegruendet 1825\n");
+    print("\n");
+    print("(C) Copyright 2008 by Jan Tepelmann, Marcel Noe, Moritz Lapp\n");
+    print("\n");
+
+    print("Type \"?\" to see a list of available commands.\n\n");
+
     printPromt();
     printf("[SHELL] Entering Processing Loop \n");
     while(1){
@@ -140,6 +149,9 @@ void shell_loop(){
             //printf("splitPos: %i, cmdLen: %i, argLen: %i, argument: %s", splitPos, strlen(cmdChars)-1, argLen, argument);
 
             switch(cmdChars[0]){
+                case 'c': // Cat
+                    print("!! CAT !!\n");
+                    break;
                 case 's': // Start
                     print("!! START !!\n");
                     break;
@@ -147,12 +159,9 @@ void shell_loop(){
                     print("!! DOWNLOAD !!\n");
                     break;
                 case 'r': // RM
-                    print("!! RM !!\n");
                     IF_FILESYSTEM_deleteFile((CORBA_Object) filesystem_id, argument, &env);
                     break;
                 case 't': // Touch
-                    print("!! TOUCH !!\n");
-
                     // Testweise eine daemliche Datei erstellen
                     IF_FILESYSTEM_createFile((CORBA_Object) filesystem_id, argument, 9000, &env);
                     
@@ -176,7 +185,7 @@ void shell_loop(){
 
                     break;
                 case '?': // list all commands
-                    print("Available Shell Commands: start, download, rm $filename, touch $filename, ls\n");
+                    print("Available Shell Commands:\n\nstart\ndownload\nrm $filename\ntouch $filename\ncat $filename\nls\n");
                     break;
                 default :
                     print("Shell-Error: Command not found\n");
