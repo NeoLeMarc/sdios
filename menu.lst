@@ -16,6 +16,8 @@ module /consoleserver
 module /simplefs
 module /apppager
 module /shell
+module /testdatei
+module /hello
 
 # module /ramdisk
 # module /filesystem.ram

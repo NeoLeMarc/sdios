@@ -41,7 +41,7 @@ inline void drawCursor() {
 IDL4_INLINE void console_write_implementation(CORBA_Object _caller, buffer_t *input, int length, idl4_server_environment *_env)
 
 {
-  printf("[DEBUG CONSOLE] arguments: length=%i, chars=%s\n", length, input->_buffer);
+  //printf("[DEBUG CONSOLE] arguments: length=%i, chars=%s\n", length, input->_buffer);
   /* implementation of IF_CONSOLE::write */
   for (int pos = 0; pos < length; pos++) {
     //printf("test %i\n", input->_buffer[pos]);
@@ -73,7 +73,7 @@ IDL4_PUBLISH_CONSOLE_WRITE(console_write_implementation);
 IDL4_INLINE void console_delete_implementation(CORBA_Object _caller, const CORBA_long numChars, idl4_server_environment *_env)
 
 {
-  printf("[CONSOLE SERVER] now we should delete %i chars...\n", numChars);
+  //printf("[CONSOLE SERVER] now we should delete %i chars...\n", numChars);
   // Delete Cursor
   *((unsigned char *)vgaStart + 160*consoleCursorVPos + 2*consoleCursorHPos) = 0xa00;
 
