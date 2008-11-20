@@ -51,7 +51,6 @@ void dumpFilehandles(){
 int locateFilehandle(char * filename){
     printf("[SIMPLE-FS] Entering locate Filehandle...\n");
     for(int i = 0; i < MAXFILE; i++){
-        printf("[SIMPLE-FS] strcmp: %i valid: %i\n", strcmp(filehandles[i].name, filename), filehandles[i].valid); 
         if(filehandles[i].valid && (strcmp(filehandles[i].name, filename) == 0)){
             return i;
         }
