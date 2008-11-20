@@ -14,6 +14,7 @@
 #include <if/ifconsole.h>
 #include <if/ifkeyboard.h>
 #include <if/iffilesystem.h>
+#include <if/iftask.h>
 
 #define MAX_COMMAND_LENGTH 200
 #define OUT_BUF_SIZE 8
@@ -21,7 +22,9 @@
 #define MAXFILE       256
 
 CORBA_Environment env (idl4_default_environment);
-L4_ThreadId_t locator_id, keyboard_id, console_id = L4_nilthread, filesystem_id = L4_nilthread, sigma0, roottask; 
+L4_ThreadId_t locator_id = L4_nilthread, keyboard_id = L4_nilthread, console_id = L4_nilthread;
+L4_ThreadId_t filesystem_id = L4_nilthread, sigma0 = L4_nilthread, roottask = L4_nilthread; 
+L4_ThreadId_t taskserver_id = L4_nilthread;
 
 // Bootinfo
 L4_BootInfo_t * bootInfo = 0;
@@ -74,6 +77,10 @@ int main(){
         IF_LOCATOR_Locate((CORBA_Object) locator_id, IF_FILESYSTEM_ID, &filesystem_id, &env);
     printf("[SHELL] thinks that filesystem-server is at %lx \n", filesystem_id);
 
+    while(L4_IsNilThread(taskserver_id))
+        IF_LOCATOR_Locate((CORBA_Object) locator_id, IF_TASK_ID, &taskserver_id, &env);
+    printf("[SHELL] thinks that taskserver is at %lx \n", taskserver_id);
+
     // Get Bootinfo
     printf("[SHELL] Trying to map bootinfo from RootTask\n");
                                                       
@@ -125,7 +132,7 @@ void shell_loop(){
         IF_KEYBOARD_read((CORBA_Object) keyboard_id, &kbbuf, &env);
         strncpy(inChars, kbbuf.chars, OUT_BUF_SIZE - 1);
         int numchars = kbbuf.numchars;
-        printf("[SHELL] Read keyboard buffer. Got %d chars (\"%s\" - as int \"%i\"), more: %d\n", numchars, inChars, inChars[0], kbbuf.more);
+        //printf("[SHELL] Read keyboard buffer. Got %d chars (\"%s\" - as int \"%i\"), more: %d\n", numchars, inChars, inChars[0], kbbuf.more);
         
         // handle special chars
         // if backspace:    delete last char
@@ -162,7 +169,7 @@ void shell_loop(){
 
         //Print chars on Screen
         if(numchars){
-            printf("[SHELL] Printing buffer='%s' on screen. numchars=%i \n", cleanChars, numchars);
+            //printf("[SHELL] Printing buffer='%s' on screen. numchars=%i \n", cleanChars, numchars);
             print (cleanChars);
         }
 
@@ -198,18 +205,24 @@ void shell_loop(){
                         IF_FILESYSTEM_mapFile((CORBA_Object) filesystem_id, argv[1], &datei, &env);  
 
                         // Datei ausgeben
-                        L4_Fpage_t dateiFpage = {raw : datei.fpage};
-                        printf("[SHELL] should cat content at 0x%lx\n", dateiFpage.raw);
-                        print((char *)L4_Address(dateiFpage));
+                        print(reinterpret_cast<char *>(0x40000000));
 
                         // Datei unmappen
-                        L4_Flush(dateiFpage);
+                        L4_Flush(recvWindow);
 
                     }
 
                     break;
                 case 's': // Start
-                    print("!! START !!\n");
+                    {
+                        // Prepend a "/" to path - taskserver expects so.
+                        *(--argv[1]) = '/';
+                        const CORBA_char dummy = 0;
+                        L4_ThreadId_t tid;
+                        tid = IF_TASK_startTask((CORBA_Object) taskserver_id, argv[1], &dummy, &dummy, &env);
+                        printf("[SHELL] Started %s as 0x%lx\n", argv[1], tid.raw);
+                        IF_TASK_waitTid((CORBA_Object) taskserver_id, &tid, &env);
+                    }
                     break;
                 case 'd': // Download
                     {

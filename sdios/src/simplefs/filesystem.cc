@@ -121,7 +121,7 @@ IDL4_INLINE void filesystem_mapFile_implementation(CORBA_Object _caller, const C
 
     idl4_fpage_set_mode(page, IDL4_MODE_MAP);
     idl4_fpage_set_page(page, fpage);
-    //idl4_set_base(page, page_end);
+    idl4_fpage_set_base(page, L4_Address(fpage));
     idl4_fpage_set_permissions(page, IDL4_PERM_FULL);
   
     return;
@@ -175,6 +175,9 @@ IDL4_INLINE void filesystem_createFile_implementation(CORBA_Object _caller, cons
 
     // 5. filesystemPointer erhöhen
     filesystemPointer += mysize / 4; // Durch 4, da Seiten.
+
+    // 6. Datei mit Nullen initialisieren
+    memset(static_cast<void*>(filehandles[i].position), '\0', mysize);
 
     printf("... created at position %i!\n", i);
     printf("Filesystem pointer incremented by %lx\n", mysize);

@@ -9,6 +9,7 @@
 
 #include <l4/bootinfo.h>
 #include <l4/types.h>
+#include <l4/sigma0.h>
 #include <idl4glue.h>
 #include <l4io.h>
 #include <elf.h>
@@ -17,6 +18,8 @@
 
 // Locator id
 L4_ThreadId_t locator_id = { raw: 0 };
+// sigma0 id, set by main
+extern L4_ThreadId_t sigma0_id;
 
 // Data structure to store associations
 #define ASSOC_TABLE_SIZE 64
@@ -179,9 +182,17 @@ IDL4_INLINE void bielfloader_associateImage_implementation(CORBA_Object _caller,
 
   appendToAssociationTable(association);
 
-  // Load Image Header
+  // Bring in module memory
   L4_BootRec_t * module = find_module(bootModuleId, (L4_BootInfo_t *)L4_BootInfo(L4_KernelInterface()));
+  L4_Word_t module_start = L4_Module_Start(module);
+  L4_Word_t module_end = L4_Module_Start(module) + L4_Module_Size(module);
+  for (L4_Word_t base = module_start; base < module_end; base += 0x1000) {
+    if (L4_IsNilFpage(L4_Sigma0_GetPage(sigma0_id, L4_FpageLog2(base, 12), L4_FpageLog2(base, 12)))) {
+       panic("sigma0 gave no module memory");
+    }
+  }
 
+  // Load Image Header
   Elf32_Ehdr * hdr = 0;
   elfLoadHeader(&hdr, module);
 

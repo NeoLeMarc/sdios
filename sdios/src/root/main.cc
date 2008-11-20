@@ -285,12 +285,11 @@ int main(void) {
 	    panic ("Was not able to get bootinfo");
     }
 
-    // Bring in some other pages needed later by other threads in our AS. 
-    // Do not remove - or do you want OpenSSL disaster, part 2?
-    volatile L4_Word_t dummy;
-    dummy = *((L4_Word_t *)0x00304018UL);
-    dummy = *((L4_Word_t *)0x00305018UL);
-    dummy = *((L4_Word_t *)0x00301d40UL);
+    // Bring in full ELF image to prevent later pagefaults in threads
+    extern char __elf_start, __elf_end;
+    volatile char dummy;
+    for (char * p = &__elf_start; p < &__elf_end; p += 0x1000)
+        dummy = *p;
 
     /* Quick check */
     if (!L4_BootInfo_Valid ((void*)L4_BootInfo (L4_KernelInterface ()))) 

@@ -16,7 +16,7 @@
 #include <if/iflogging.h>
 #include "ram_dsm.h"
 
-L4_ThreadId_t locatorid; 
+L4_ThreadId_t sigma0_id = L4_nilthread;
 
 // Bitmap to store available state
 // calculate bitmap size via RAM size / 4KB (page size) / 32 (bits per word) 
@@ -26,15 +26,21 @@ L4_Word_t available[AVAILABLE_BITMAP_SIZE];
 int main () {
     printf ("[RAM-DSM] is alive\n");
 
+    // Initiate sigma0_id
+    L4_KernelInterfacePage_t * kip = (L4_KernelInterfacePage_t *)
+    L4_GetKernelInterface ();
+    sigma0_id = L4_GlobalId (kip->ThreadInfo.X.UserBase, 1);
+
     // Try to get whole memory from sigma0
     // We are starting at 1 MB, because we do
     // not want to fiddle around with architecture
     // specific stuff like EBDA etc. IO-DSM has to 
     // take this memory later.
-    for (L4_Word_t i = 0x00100000UL; i < 0x02000000UL; i += 0x1000UL) {
-      if (!L4_IsNilFpage(L4_Sigma0_GetPage(L4_nilthread, L4_FpageLog2(i, 12), L4_FpageLog2(i, 12)))) {
-        // page size is 2^12, 2^5 bits per word
-        available[i >> 17] |= (1UL << ((i >> 12) & 0x1fUL));
+    for (L4_Word_t i = 0x01000UL; i < 0x02000UL; i++) {
+      // page size is 2^12 byte
+      if (!L4_IsNilFpage(L4_Sigma0_GetAny(L4_nilthread, 12, L4_FpageLog2(i << 12, 12)))) {
+        // 2^5 bits per word
+        available[i >> 5] |= (1UL << (i & 0x1fUL));
       }
     }
 
